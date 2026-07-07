@@ -21,6 +21,7 @@ import {
   Search,
   Megaphone,
   Sparkles,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -55,6 +56,7 @@ const sections = [
     label: "Business",
     items: [
       { title: "Payments & invoicing", href: "/admin/invoicing", icon: Receipt },
+      { title: "Tools", href: "/admin/tools", icon: Wrench },
       { title: "Analytics", href: "/admin/analytics", icon: BarChart3 },
       { title: "Settings", href: "/admin/settings", icon: Settings },
     ],

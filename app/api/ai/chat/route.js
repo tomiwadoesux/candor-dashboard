@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildTalentDossier } from "@/lib/ai/context";
+import { hfChat } from "@/lib/ai/hf";
 
-const HF_URL = "https://router.huggingface.co/v1/chat/completions";
-const HF_MODEL = process.env.HF_MODEL ?? "meta-llama/Llama-3.3-70B-Instruct";
 const MAX_TURNS = 20;
 
 // Ask Candor — talent-only assistant grounded in the caller's own data.
@@ -70,36 +69,16 @@ export async function POST(request) {
     { role: "user", content: message },
   ];
 
-  let reply;
-  try {
-    const res = await fetch(HF_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.HF_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: HF_MODEL,
-        messages,
-        max_tokens: 400,
-        temperature: 0.4,
-      }),
-    });
-    if (!res.ok) throw new Error(`HF ${res.status}`);
-    const json = await res.json();
-    reply = json.choices?.[0]?.message?.content?.trim();
-  } catch {
+  const result = await hfChat(messages);
+  if (result.error) {
     return NextResponse.json({
       reply:
-        "I couldn't reach the assistant just now — free-tier limits, most likely. Try again in a minute.",
+        result.error === "not_configured"
+          ? "The assistant isn't configured yet — the team needs to add an HF_TOKEN."
+          : "I couldn't reach the assistant just now — try again in a minute. If this keeps happening, tell your booker.",
     });
   }
-
-  if (!reply) {
-    return NextResponse.json({
-      reply: "I came back empty-handed — try rephrasing that?",
-    });
-  }
+  const reply = result.reply;
 
   const now = new Date().toISOString();
   const newMessages = [
