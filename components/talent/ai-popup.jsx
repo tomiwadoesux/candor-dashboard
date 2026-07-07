@@ -8,14 +8,14 @@ import { useRail } from "./rail-context";
 const SUGGESTED = [
   "When is my next booking?",
   "How much am I owed?",
-  "What's my portfolio status?",
-  "Where is my Ziva Lagos shoot?",
+  "What castings are open right now?",
+  "What did I earn this year?",
 ];
 
 const SEED_MESSAGES = [
   {
     role: "ai",
-    text: "Evening, Zara — I can answer questions about your bookings, payments, schedule, and portfolio. What's on your mind?",
+    text: "Hi — I can answer questions about your bookings, payments, schedule, and open castings. What's on your mind?",
   },
 ];
 
@@ -23,6 +23,7 @@ export function TalentAiPopup() {
   const { aiOpen, closeAi } = useRail();
   const [messages, setMessages] = useState(SEED_MESSAGES);
   const [draft, setDraft] = useState("");
+  const [thinking, setThinking] = useState(false);
   const panelRef = useRef(null);
   const scrollRef = useRef(null);
 
@@ -39,21 +40,38 @@ export function TalentAiPopup() {
     if (aiOpen) scrollRef.current?.scrollTo({ top: 99999, behavior: "smooth" });
   }, [aiOpen, messages.length]);
 
-  const send = (text) => {
+  const send = async (text) => {
     const body = text?.trim();
-    if (!body) return;
+    if (!body || thinking) return;
     setMessages((prev) => [...prev, { role: "talent", text: body }]);
     setDraft("");
+    setThinking(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: body }),
+      });
+      const json = await res.json();
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: "Your next booking is Ziva Lagos — editorial, March 28 in Victoria Island. Call time 9:00am. Fee ₦450,000, net ₦360,000 after commission.",
+          text:
+            json.reply ??
+            json.error ??
+            "Something went sideways — try again in a moment.",
         },
       ]);
-    }, 520);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "ai", text: "I couldn't reach the server — try again in a moment." },
+      ]);
+    } finally {
+      setThinking(false);
+    }
   };
 
   if (!aiOpen) return null;
@@ -133,6 +151,19 @@ export function TalentAiPopup() {
               </div>
             </div>
           ))}
+          {thinking && (
+            <div className="flex gap-2">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+                <Sparkles className="h-3 w-3" />
+              </div>
+              <div className="rounded-2xl rounded-bl-md bg-surface-muted px-3.5 py-2.5 text-[13px] text-muted-foreground">
+                <span className="inline-flex gap-1">
+                  <span className="dot-pulse inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                  Thinking…
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {messages.length <= 1 && (
