@@ -20,6 +20,7 @@ import {
   PanelLeft,
   Search,
   Megaphone,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -45,6 +46,7 @@ const sections = [
         icon: MessageSquare,
       },
       { title: "Community feed", href: "/admin/community", icon: Megaphone },
+      { title: "AI activity", href: "/admin/ai-activity", icon: Sparkles },
       { title: "Documents", href: "/admin/documents", icon: FileText },
       { title: "Milestones", href: "/admin/milestones", icon: Award },
     ],

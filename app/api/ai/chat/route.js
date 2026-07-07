@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { buildTalentDossier } from "@/lib/ai/context";
 
 const HF_URL = "https://router.huggingface.co/v1/chat/completions";
 const HF_MODEL = process.env.HF_MODEL ?? "meta-llama/Llama-3.3-70B-Instruct";
@@ -18,7 +19,7 @@ export async function POST(request) {
 
   const { data: talent } = await supabase
     .from("talent_profiles")
-    .select("id, first_name")
+    .select("*")
     .eq("user_id", user.id)
     .single();
   if (!talent) {
@@ -41,37 +42,11 @@ export async function POST(request) {
     });
   }
 
-  // Ground the model in this talent's actual data (RLS scopes every query).
-  const [bookings, payments, castings] = await Promise.all([
-    supabase
-      .from("bookings")
-      .select(
-        "project_title, status, booking_date, booking_end_date, call_time, location_city, talent_fee, fee_currency, clients(company_name)"
-      )
-      .order("booking_date", { ascending: false })
-      .limit(12),
-    supabase
-      .from("payments")
-      .select(
-        "gross_fee, commission_amount, net_talent_payment, currency, status, invoice_number, talent_payment_date"
-      )
-      .order("created_at", { ascending: false })
-      .limit(12),
-    supabase
-      .from("open_castings_public")
-      .select("title, category, location, deadline")
-      .eq("status", "open")
-      .limit(8),
-  ]);
-
-  const context = {
-    talent_name: talent.first_name,
-    today: new Date().toISOString().slice(0, 10),
-    bookings: bookings.data ?? [],
-    payments: payments.data ?? [],
-    open_castings: castings.data ?? [],
-    commission_note: "Candor's commission is 20% of gross fees.",
-  };
+  // Ground the model in this talent's full account dossier — a markdown
+  // document regenerated from the live database on every question. RLS scopes
+  // every query inside it to the signed-in talent's own rows, so the dossier
+  // can never contain another talent's data.
+  const dossier = await buildTalentDossier(supabase, talent);
 
   // Conversation history (single rolling conversation per talent).
   const { data: convo } = await supabase
@@ -89,7 +64,7 @@ export async function POST(request) {
   const messages = [
     {
       role: "system",
-      content: `You are Ask Candor, the assistant inside Candor Management Agency's talent dashboard (models, photographers, creative directors — Lagos, London, USA). Answer only from the JSON context below. Be warm, brief, and concrete. If the data doesn't contain the answer, say so and point the talent to their booker at contact@candor-management.com. Never invent bookings, fees, or dates.\n\nCONTEXT:\n${JSON.stringify(context)}`,
+      content: `You are Ask Candor, the private assistant inside ${talent.first_name}'s Candor Management Agency talent dashboard (Lagos · London · USA). You are speaking ONLY to ${talent.first_name} ${talent.last_name}, and the dossier below contains ONLY their account. Answer strictly from the dossier — never invent bookings, fees, dates, or brand names, and never speculate about any other talent's information. Casting brand names are confidential until selection. Be warm, brief, and concrete; quote exact figures and dates from the dossier. If the dossier doesn't contain the answer, say so and point them to their booker at contact@candor-management.com.\n\n${dossier}`,
     },
     ...history,
     { role: "user", content: message },
@@ -126,10 +101,11 @@ export async function POST(request) {
     });
   }
 
+  const now = new Date().toISOString();
   const newMessages = [
     ...history,
-    { role: "user", content: message },
-    { role: "assistant", content: reply },
+    { role: "user", content: message, timestamp: now },
+    { role: "assistant", content: reply, timestamp: now },
   ].slice(-MAX_TURNS);
 
   if (convo?.id) {
