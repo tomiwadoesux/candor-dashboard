@@ -2,13 +2,15 @@ import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminTopbar } from "@/components/admin/topbar";
 import { SidebarProvider } from "@/components/admin/sidebar-context";
 import { ThemeProvider } from "@/components/admin/theme-provider";
+import { requireRole, ADMIN_ROLES } from "@/lib/auth";
 
 export const metadata = {
   title: "Candor · Admin",
   description: "Talent management operations for Candor Agency",
 };
 
-export default function AdminLayout({ children }) {
+export default async function AdminLayout({ children }) {
+  await requireRole(...ADMIN_ROLES);
   return (
     <ThemeProvider>
       <SidebarProvider>
