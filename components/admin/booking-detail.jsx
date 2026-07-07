@@ -316,18 +316,27 @@ function PaymentsSection({ booking: b, canManagePayments }) {
               </div>
               <div
                 data-slot="numeric"
-                className="col-span-3 text-right font-serif text-[16px] font-light text-foreground"
+                className="col-span-2 text-right font-serif text-[16px] font-light text-foreground"
               >
                 {money(p.gross_fee, p.currency)}
               </div>
               <div
                 data-slot="numeric"
-                className="col-span-3 text-right font-mono text-[11.5px] text-muted-foreground"
+                className="col-span-2 text-right font-mono text-[11.5px] text-muted-foreground"
               >
                 net {money(p.net_talent_payment, p.currency)}
               </div>
               <div className="col-span-3 text-right">
                 <StatusPill status={p.status} accent={paymentAccent(p.status)} />
+              </div>
+              <div className="col-span-2 text-right">
+                <Link
+                  href={`/admin/invoicing/${p.id}/invoice`}
+                  className="pressable inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-bronze"
+                >
+                  <FileText className="h-3 w-3" />
+                  Invoice
+                </Link>
               </div>
             </li>
           ))}

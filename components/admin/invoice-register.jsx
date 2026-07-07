@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, Hash } from "lucide-react";
+import { ArrowUpRight, Check, FileText, Hash } from "lucide-react";
 import {
   markClientPaid,
   markTalentPaid,
@@ -174,6 +174,13 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
               </div>
 
               <div className="col-span-2 flex flex-col items-end gap-1.5">
+                <Link
+                  href={`/admin/invoicing/${p.id}/invoice`}
+                  className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze"
+                >
+                  <FileText className="h-3 w-3" />
+                  Invoice
+                </Link>
                 {canManage && p.status === "awaiting_client_payment" && (
                   <button
                     type="button"
