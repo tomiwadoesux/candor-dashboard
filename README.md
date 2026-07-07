@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Candor Dashboard
 
-## Getting Started
+Operations platform for **Candor Management Agency** — talent management across
+Lagos, London, and the USA. Two interfaces behind one login:
 
-First, run the development server:
+- **`/talent`** — represented talent: bookings, payments (20% commission math),
+  communications inbox, documents, calendar, portfolio, casting board,
+  community milestones, and the **Ask Candor** AI assistant.
+- **`/admin`** — Candor's team (booker / MD / CEO): roster, clients, bookings
+  with status history, casting board with internal brand privacy, payment
+  processing workflow, milestone approvals, analytics, team management.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+A public REST endpoint (`/api/public/roster`) feeds the marketing site at
+candor-management.com.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Next.js 16 (App Router, JS) · Tailwind v4 · Base UI (shadcn "base-nova") ·
+Supabase (Postgres 17, Auth, RLS) · Hugging Face Inference (AI assistant).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Design system: **"Ink & Bone"** — gallery-light default (bone/ivory + ink) with
+a luxury-dark mode, bronze accent, Instrument Serif / Hanken Grotesk /
+IBM Plex Mono. Motion follows design-engineering rules: exact transition
+properties, strong ease-out curves, everything ≤300ms, reduced-motion
+supported.
 
-## Learn More
+## Setup
 
-To learn more about Next.js, take a look at the following resources:
+1. `npm install`
+2. Copy `.env.example` → `.env.local` and fill:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — project API settings
+   - `SUPABASE_SERVICE_ROLE_KEY` — required only for creating talent/team accounts from the admin UI
+   - `HF_TOKEN` — optional; enables the Ask Candor assistant
+   - `NEXT_PUBLIC_SITE_URL` — deployment origin (password-reset emails)
+3. Apply the database: run `supabase/migrations/*.sql` in order (see
+   `supabase/README.md`). `003_seed.sql` is demo data — skip in production.
+4. Create your first login: Supabase Dashboard → Authentication → Add user,
+   with user metadata `{"full_name": "Your Name", "role": "ceo"}` — the
+   signup trigger creates the matching profile. Roles: `talent`, `booker`,
+   `md`, `ceo`.
+5. `npm run dev`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `proxy.js` — session refresh + route gating (Next 16's middleware successor)
+- `lib/auth.js` — request-cached DAL: `getProfile()`, `requireRole()`, `assertRole()`
+- `lib/queries/*` — server-only reads; RLS scopes talent to their own rows
+- `lib/actions/*` — zod-validated server actions; every action re-asserts role
+- `lib/format.js` — shared money/date/status formatting
+- `supabase/migrations/` — schema, RLS policies, seed, escalation function
+- `.claude/DATA_LAYER.md` — full contract of the data layer
+- `specs2/` — original product specification
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Security model: Row-Level Security is the source of truth — talent cannot read
+other talents' bookings/payments even if application code is buggy; casting
+brand names are physically unselectable by talent (view-based projection);
+payment processing is database-gated to MD/CEO.
