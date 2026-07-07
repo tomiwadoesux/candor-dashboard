@@ -25,7 +25,7 @@ const CATEGORIES = [
   "educator",
 ];
 
-export function CastingNewForm({ clients = [] }) {
+export function CastingNewForm({ clients = [], defaults = {} }) {
   const [state, action, pending] = useActionState(createCasting, undefined);
   const router = useRouter();
 
@@ -48,12 +48,18 @@ export function CastingNewForm({ clients = [] }) {
             <input
               name="title"
               required
+              defaultValue={defaults.title}
               className={inputClass}
               placeholder="Beauty campaign — international brand"
             />
           </Field>
           <Field label="Category *">
-            <select name="category" required defaultValue="model" className={inputClass}>
+            <select
+              name="category"
+              required
+              defaultValue={defaults.category || "model"}
+              className={inputClass}
+            >
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {statusLabel(c)}
@@ -62,26 +68,58 @@ export function CastingNewForm({ clients = [] }) {
             </select>
           </Field>
           <Field label="Location *">
-            <select name="location" required defaultValue="lagos" className={inputClass}>
+            <select
+              name="location"
+              required
+              defaultValue={defaults.location || "lagos"}
+              className={inputClass}
+            >
               <option value="lagos">Lagos</option>
               <option value="london">London</option>
               <option value="usa_other">USA / Other</option>
             </select>
           </Field>
           <Field label="Shoot start *">
-            <input name="shootDateStart" type="date" required className={inputClass} />
+            <input
+              name="shootDateStart"
+              type="date"
+              required
+              defaultValue={defaults.shootDateStart}
+              className={inputClass}
+            />
           </Field>
           <Field label="Shoot end">
-            <input name="shootDateEnd" type="date" className={inputClass} />
+            <input
+              name="shootDateEnd"
+              type="date"
+              defaultValue={defaults.shootDateEnd}
+              className={inputClass}
+            />
           </Field>
           <Field label="Deadline for interest *">
-            <input name="deadline" type="datetime-local" required className={inputClass} />
+            <input
+              name="deadline"
+              type="datetime-local"
+              required
+              defaultValue={defaults.deadline}
+              className={inputClass}
+            />
           </Field>
           <Field label="Work type">
-            <input name="workType" className={inputClass} placeholder="Stills, film, runway…" />
+            <input
+              name="workType"
+              defaultValue={defaults.workType}
+              className={inputClass}
+              placeholder="Stills, film, runway…"
+            />
           </Field>
           <Field label="Media usage" className="md:col-span-2">
-            <input name="mediaUsage" className={inputClass} placeholder="Digital + print, 12 months" />
+            <input
+              name="mediaUsage"
+              defaultValue={defaults.mediaUsage}
+              className={inputClass}
+              placeholder="Digital + print, 12 months"
+            />
           </Field>
         </div>
         <div className="mt-4 space-y-4">
@@ -89,6 +127,7 @@ export function CastingNewForm({ clients = [] }) {
             <textarea
               name="description"
               rows={3}
+              defaultValue={defaults.description}
               className={`${inputClass} resize-none`}
               placeholder="What the job is, without naming the brand."
             />
@@ -97,6 +136,7 @@ export function CastingNewForm({ clients = [] }) {
             <textarea
               name="requirements"
               rows={2}
+              defaultValue={defaults.requirements}
               className={`${inputClass} resize-none`}
               placeholder="Measurements, look, availability…"
             />
@@ -123,6 +163,7 @@ export function CastingNewForm({ clients = [] }) {
           <Field label="Brand name (internal)">
             <input
               name="brandNameInternal"
+              defaultValue={defaults.brandNameInternal}
               className={inputClass}
               placeholder="Revealed to talent only on selection"
             />

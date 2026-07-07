@@ -48,6 +48,18 @@ export default async function NewBookingPage({ searchParams }) {
           }))}
           initialTalentId={typeof sp.talentId === "string" ? sp.talentId : ""}
           initialClientId={typeof sp.clientId === "string" ? sp.clientId : ""}
+          defaults={{
+            projectTitle: typeof sp.projectTitle === "string" ? sp.projectTitle : "",
+            bookingDate:
+              typeof sp.bookingDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.bookingDate)
+                ? sp.bookingDate
+                : "",
+            feeCurrency: ["NGN", "GBP", "USD"].includes(sp.feeCurrency) ? sp.feeCurrency : "",
+            talentFee:
+              typeof sp.talentFee === "string" && Number(sp.talentFee) > 0 ? sp.talentFee : "",
+            mediaUsage: typeof sp.mediaUsage === "string" ? sp.mediaUsage : "",
+            notes: typeof sp.notes === "string" ? sp.notes : "",
+          }}
         />
       </div>
     </div>

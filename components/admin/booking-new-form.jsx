@@ -15,6 +15,7 @@ export function BookingNewForm({
   clients = [],
   initialTalentId = "",
   initialClientId = "",
+  defaults = {},
 }) {
   const [state, action, pending] = useActionState(createBooking, undefined);
   const router = useRouter();
@@ -82,6 +83,7 @@ export function BookingNewForm({
             <input
               name="projectTitle"
               required
+              defaultValue={defaults.projectTitle}
               className={inputClass}
               placeholder="SS26 campaign — hero film"
             />
@@ -101,7 +103,13 @@ export function BookingNewForm({
             </select>
           </Field>
           <Field label="Booking date *">
-            <input name="bookingDate" type="date" required className={inputClass} />
+            <input
+              name="bookingDate"
+              type="date"
+              required
+              defaultValue={defaults.bookingDate}
+              className={inputClass}
+            />
           </Field>
           <Field label="End date">
             <input name="bookingEndDate" type="date" className={inputClass} />
@@ -141,11 +149,16 @@ export function BookingNewForm({
               step="0.01"
               min="0"
               required
+              defaultValue={defaults.talentFee}
               className={inputClass}
             />
           </Field>
           <Field label="Currency">
-            <select name="feeCurrency" defaultValue="NGN" className={inputClass}>
+            <select
+              name="feeCurrency"
+              defaultValue={defaults.feeCurrency || "NGN"}
+              className={inputClass}
+            >
               <option value="NGN">NGN — ₦</option>
               <option value="GBP">GBP — £</option>
               <option value="USD">USD — $</option>
@@ -170,7 +183,12 @@ export function BookingNewForm({
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <Field label="Media usage">
-            <input name="mediaUsage" className={inputClass} placeholder="Digital + OOH" />
+            <input
+              name="mediaUsage"
+              defaultValue={defaults.mediaUsage}
+              className={inputClass}
+              placeholder="Digital + OOH"
+            />
           </Field>
           <Field label="Territory">
             <input name="territory" className={inputClass} placeholder="Nigeria, worldwide…" />
@@ -181,7 +199,12 @@ export function BookingNewForm({
         </div>
         <div className="mt-4">
           <Field label="Notes">
-            <textarea name="notes" rows={3} className={`${inputClass} resize-none`} />
+            <textarea
+              name="notes"
+              rows={3}
+              defaultValue={defaults.notes}
+              className={`${inputClass} resize-none`}
+            />
           </Field>
         </div>
       </section>
