@@ -1,6 +1,5 @@
 import { Hanken_Grotesk, Instrument_Serif, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { StoreProvider } from "@/lib/store";
 
 const hanken = Hanken_Grotesk({
   variable: "--font-hanken",
@@ -36,7 +35,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground">
-        <StoreProvider>{children}</StoreProvider>
+        {children}
       </body>
     </html>
   );

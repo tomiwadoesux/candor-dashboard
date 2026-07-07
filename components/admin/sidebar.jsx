@@ -43,11 +43,10 @@ const sections = [
         title: "Communications",
         href: "/admin/communications",
         icon: MessageSquare,
-        badge: 3,
       },
       { title: "Community feed", href: "/admin/community", icon: Megaphone },
       { title: "Documents", href: "/admin/documents", icon: FileText },
-      { title: "Milestones", href: "/admin/milestones", icon: Award, badge: 2 },
+      { title: "Milestones", href: "/admin/milestones", icon: Award },
     ],
   },
   {
@@ -60,7 +59,13 @@ const sections = [
   },
 ];
 
-export function AdminSidebar() {
+const ROLE_LABELS = {
+  booker: "Booker",
+  md: "Managing Director",
+  ceo: "Chief Executive",
+};
+
+export function AdminSidebar({ profile }) {
   const pathname = usePathname();
   const { collapsed, toggle } = useSidebar();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -106,13 +111,13 @@ export function AdminSidebar() {
               <span className="relative flex h-3.5 w-3.5 items-center justify-center">
                 <Sun
                   className={cn(
-                    "absolute h-3.5 w-3.5 transition-all duration-300",
+                    "absolute h-3.5 w-3.5 transition-[transform,opacity] duration-200 ease-out",
                     theme === "dark" ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
                   )}
                 />
                 <Moon
                   className={cn(
-                    "absolute h-3.5 w-3.5 transition-all duration-300",
+                    "absolute h-3.5 w-3.5 transition-[transform,opacity] duration-200 ease-out",
                     theme === "dark" ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
                   )}
                 />
@@ -239,7 +244,12 @@ export function AdminSidebar() {
           )}
         >
           <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[11px] font-medium ring-1 ring-border">
-            AO
+            {(profile?.full_name || "C A")
+              .split(" ")
+              .map((p) => p[0])
+              .slice(0, 2)
+              .join("")
+              .toUpperCase()}
             <span
               aria-hidden
               className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-success ring-2 ring-sidebar dot-pulse"
@@ -248,10 +258,10 @@ export function AdminSidebar() {
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <div className="truncate font-serif text-[13px] italic text-foreground">
-                Adaora
+                {profile?.full_name || "Candor Admin"}
               </div>
               <div className="truncate text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/70">
-                Talent Director
+                {ROLE_LABELS[profile?.role] || "Team"}
               </div>
             </div>
           )}

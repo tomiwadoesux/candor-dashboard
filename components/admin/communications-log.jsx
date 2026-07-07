@@ -1,297 +1,182 @@
-"use client";
+// Server component — tab filter is searchParams-driven.
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, Search, X } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, Megaphone, User } from "lucide-react";
+import { relativeTime, statusLabel } from "@/lib/format";
+import { EmptyRow, accentText } from "@/components/admin/kit";
 
-const FILTERS = [
+const TABS = [
   { id: "all", label: "All" },
+  { id: "awaiting", label: "Awaiting response" },
   { id: "escalated", label: "Escalated" },
-  { id: "pending", label: "Awaiting" },
-  { id: "closed", label: "Closed" },
 ];
 
-const TYPE_LABELS = {
-  availability_check: "Availability",
-  booking_update: "Booking",
-  payment_update: "Payment",
-  portfolio_request: "Portfolio",
-  pre_job_brief: "Brief",
-  general: "General",
-  announcement: "Announcement",
-};
-
-function fmtDateTime(s) {
-  const d = new Date(s);
-  return d.toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function responseAccent(status) {
+  switch (status) {
+    case "accepted":
+    case "confirmed":
+      return "success";
+    case "declined":
+      return "destructive";
+    case "queried":
+      return "warning";
+    case "pending":
+      return "muted";
+    default:
+      return "muted";
+  }
 }
 
-function statusOf(n) {
-  const total = n.recipientIds.length;
-  const responded = n.responses.length;
-  if (n.escalated) return "escalated";
-  if (responded < total) return "pending";
-  return "closed";
+function typeAccent(type) {
+  switch (type) {
+    case "payment_update":
+      return "success";
+    case "availability_check":
+    case "booking_update":
+    case "pre_job_brief":
+      return "warning";
+    case "announcement":
+      return "bronze";
+    default:
+      return "muted";
+  }
 }
 
-export function CommunicationsLog({ notifications, talent }) {
-  const [filter, setFilter] = useState("all");
-  const [query, setQuery] = useState("");
-  const [openId, setOpenId] = useState(null);
-
-  const talentById = useMemo(() => {
-    const m = {};
-    talent.forEach((t) => {
-      m[t.id] = t;
-    });
-    return m;
-  }, [talent]);
-
-  const counts = useMemo(() => {
-    const c = { all: notifications.length, escalated: 0, pending: 0, closed: 0 };
-    notifications.forEach((n) => {
-      c[statusOf(n)] += 1;
-    });
-    return c;
-  }, [notifications]);
-
-  const sorted = useMemo(
-    () =>
-      [...notifications].sort(
-        (a, b) => new Date(b.sentAt) - new Date(a.sentAt)
-      ),
-    [notifications]
-  );
-
-  const filtered = useMemo(() => {
-    return sorted.filter((n) => {
-      if (filter !== "all" && statusOf(n) !== filter) return false;
-      if (!query.trim()) return true;
-      const q = query.trim().toLowerCase();
-      return (
-        n.title.toLowerCase().includes(q) ||
-        n.body.toLowerCase().includes(q) ||
-        n.recipientNames.some((r) => r.toLowerCase().includes(q))
-      );
-    });
-  }, [sorted, filter, query]);
-
+export function CommunicationsLog({ notifications, tab = "all" }) {
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {FILTERS.map((f) => {
-            const active = filter === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
-                  active
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                }`}
-              >
-                {f.label}
-                <span
-                  className={`font-mono text-[9.5px] ${
-                    active ? "text-background/70" : "text-muted-foreground/60"
-                  }`}
-                >
-                  {counts[f.id] ?? 0}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="ml-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground focus-within:border-foreground/50">
-          <Search className="h-3 w-3" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search messages, recipients"
-            className="w-56 bg-transparent text-[11.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Clear"
+      <div className="flex flex-wrap items-center gap-1.5">
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <Link
+              key={t.id}
+              href={t.id === "all" ? "/admin/communications" : `/admin/communications?tab=${t.id}`}
+              className={`pressable inline-flex items-center rounded-full border px-3 py-1 text-[11px] transition-colors ${
+                active
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+              }`}
             >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+              {t.label}
+            </Link>
+          );
+        })}
       </div>
 
       <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
-        {filtered.map((n, i) => {
-          const total = n.recipientIds.length;
-          const responded = n.responses.length;
-          const pct = Math.round((responded / total) * 100);
-          const status = statusOf(n);
-          const isOpen = openId === n.id;
+        {notifications.map((n) => {
+          const recipients = n.recipients || [];
+          const isBroadcast = !n.talent && recipients.length > 0;
           return (
-            <li key={n.id}>
-              <button
-                type="button"
-                onClick={() => setOpenId(isOpen ? null : n.id)}
-                className="group relative grid w-full grid-cols-12 items-start gap-x-4 py-5 text-left transition-colors hover:bg-muted/30"
-              >
-                {n.escalated && (
-                  <span className="absolute left-0 top-5 h-10 w-[2px] bg-rose-500" />
-                )}
-                <div className="col-span-1 pl-4 font-mono text-[10px] text-muted-foreground/60">
-                  №{String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="col-span-6 min-w-0">
-                  <div className="flex items-baseline gap-3">
-                    <h3 className="truncate font-serif text-[18px] font-light text-foreground">
-                      {n.title}
-                    </h3>
-                    {n.escalated && (
-                      <span className="shrink-0 inline-flex items-center gap-1 text-[9.5px] uppercase tracking-[0.14em] text-rose-700 dark:text-rose-400">
-                        <AlertTriangle className="h-3 w-3" />
-                        Escalated
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 line-clamp-1 text-[12px] text-muted-foreground">
-                    {n.body}
-                  </div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] text-muted-foreground/80">
-                    <span className="uppercase tracking-[0.1em]">
-                      {TYPE_LABELS[n.type] || n.type}
-                    </span>
-                    <span>Sent · {fmtDateTime(n.sentAt)}</span>
-                    <span>{n.sentBy}</span>
-                  </div>
-                </div>
-                <div className="col-span-3">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Responses
-                  </div>
-                  <div className="mt-0.5 flex items-baseline gap-1.5 font-serif text-[18px] font-light leading-none text-foreground">
-                    {responded}
-                    <span className="text-[11px] text-muted-foreground/70">
-                      / {total}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-[2px] w-24 overflow-hidden bg-border/60">
-                    <div
-                      className={`h-full ${
-                        pct === 100
-                          ? "bg-emerald-500"
-                          : n.escalated
-                          ? "bg-rose-500"
-                          : "bg-foreground/60"
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Status
-                  </div>
+            <li key={n.id} className="py-5">
+              <div className="grid grid-cols-12 items-start gap-x-4">
+                <div className="col-span-2">
                   <div
-                    className={`mt-0.5 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${
-                      status === "closed"
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : status === "escalated"
-                        ? "text-rose-700 dark:text-rose-400"
-                        : "text-muted-foreground"
-                    }`}
+                    className={`inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${accentText(typeAccent(n.type))}`}
                   >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        status === "closed"
-                          ? "bg-emerald-500"
-                          : status === "escalated"
-                          ? "bg-rose-500"
-                          : "bg-muted-foreground"
-                      }`}
-                    />
-                    {status === "closed"
-                      ? "Closed"
-                      : status === "escalated"
-                      ? "Escalated"
-                      : "Awaiting"}
+                    {isBroadcast ? (
+                      <Megaphone className="h-3 w-3" />
+                    ) : (
+                      <User className="h-3 w-3" />
+                    )}
+                    {statusLabel(n.type)}
                   </div>
-                </div>
-              </button>
-
-              {isOpen && (
-                <div className="grid grid-cols-12 gap-x-4 px-2 pb-6">
-                  <div className="col-span-1" />
-                  <div className="col-span-11 space-y-4 rounded-sm bg-muted/30 p-5">
-                    <p className="font-serif text-[15px] font-light leading-relaxed text-foreground">
-                      {n.body}
-                    </p>
-                    <div>
-                      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                        Recipients
-                      </div>
-                      <ul className="mt-2 divide-y divide-border/40">
-                        {n.recipientIds.map((rid, idx) => {
-                          const t = talentById[rid];
-                          const name = n.recipientNames[idx];
-                          const response = n.responses.find(
-                            (r) => r.talentId === rid
-                          );
-                          return (
-                            <li
-                              key={rid}
-                              className="flex items-center gap-3 py-2"
-                            >
-                              <span className="grid h-7 w-7 place-items-center rounded-full bg-muted/60 font-serif text-[11px] font-light italic text-foreground ring-1 ring-border/60">
-                                {t?.avatar || name.slice(0, 2).toUpperCase()}
-                              </span>
-                              <span className="flex-1 text-[12.5px] text-foreground">
-                                {name}
-                              </span>
-                              {response ? (
-                                <>
-                                  <span className="text-[10.5px] text-emerald-700 dark:text-emerald-400">
-                                    {response.response}
-                                  </span>
-                                  <span className="font-mono text-[9.5px] text-muted-foreground/60">
-                                    {fmtDateTime(response.respondedAt)}
-                                  </span>
-                                </>
-                              ) : (
-                                <span
-                                  className={`text-[10.5px] uppercase tracking-[0.14em] ${
-                                    n.escalated
-                                      ? "text-rose-700 dark:text-rose-400"
-                                      : "text-muted-foreground"
-                                  }`}
-                                >
-                                  No reply
-                                </span>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
+                  <div className="mt-2 font-mono text-[10.5px] text-muted-foreground/70">
+                    {relativeTime(n.created_at)}
+                  </div>
+                  {n.sender && (
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground/60">
+                      by {n.sender.full_name}
                     </div>
-                  </div>
+                  )}
+                  {n.escalated && (
+                    <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      Escalated
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <div className="col-span-7 min-w-0">
+                  <h3 className="font-serif text-[19px] font-light leading-snug text-foreground">
+                    {n.title}
+                  </h3>
+                  <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-muted-foreground">
+                    {n.body}
+                  </p>
+                </div>
+
+                <div className="col-span-3 text-right">
+                  {!isBroadcast ? (
+                    <>
+                      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                        To
+                      </div>
+                      <div className="mt-0.5 truncate text-[12.5px] text-foreground">
+                        {n.talent
+                          ? `${n.talent.first_name} ${n.talent.last_name}`
+                          : "—"}
+                      </div>
+                      {n.requires_response && (
+                        <div
+                          className={`mt-1 text-[10.5px] uppercase tracking-[0.14em] ${accentText(responseAccent(n.response_status))}`}
+                        >
+                          {n.response_status === "pending"
+                            ? "Awaiting reply"
+                            : statusLabel(n.response_status)}
+                        </div>
+                      )}
+                      {n.response_text && (
+                        <div className="mt-1 truncate text-[11px] italic text-muted-foreground">
+                          “{n.response_text}”
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                        Recipients · {recipients.length}
+                      </div>
+                      <ul className="mt-1 space-y-0.5">
+                        {recipients.slice(0, 4).map((r) => (
+                          <li
+                            key={r.id}
+                            className="flex items-baseline justify-end gap-2 text-[11px]"
+                          >
+                            <span className="truncate text-muted-foreground">
+                              {r.talent
+                                ? `${r.talent.first_name} ${r.talent.last_name}`
+                                : "—"}
+                            </span>
+                            <span
+                              className={`shrink-0 text-[9.5px] uppercase tracking-[0.12em] ${accentText(responseAccent(r.response_status))}`}
+                            >
+                              {n.requires_response
+                                ? statusLabel(r.response_status)
+                                : r.is_read
+                                  ? "Read"
+                                  : "Unread"}
+                            </span>
+                          </li>
+                        ))}
+                        {recipients.length > 4 && (
+                          <li className="text-[10px] text-muted-foreground/70">
+                            + {recipients.length - 4} more
+                          </li>
+                        )}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </div>
             </li>
           );
         })}
-        {filtered.length === 0 && (
-          <li className="py-10 text-center text-[12px] text-muted-foreground">
-            Nothing on the wire.
-          </li>
+        {notifications.length === 0 && (
+          <EmptyRow>
+            Nothing on the wire in this view — compose the first message above.
+          </EmptyRow>
         )}
       </ul>
     </>

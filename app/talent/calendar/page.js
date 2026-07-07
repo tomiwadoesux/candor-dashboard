@@ -1,149 +1,94 @@
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { myBookingsInRange } from "@/lib/queries/bookings";
 import { CalendarView } from "@/components/talent/calendar/view";
-import { bookings, openCastings, talent } from "@/lib/data";
 
-const ME_ID = "1";
-
-const EXTRA_EVENTS = [
-  {
-    id: "b-zara-3",
-    kind: "confirmed",
-    title: "Afropolitan — May issue",
-    type: "Editorial",
-    location: "Maduka Studio · Lagos",
-    time: "Call 7:30am",
-    start: "2026-04-24",
-    end: "2026-04-24",
-    note: "Light, airy mood — mood board on Tuesday.",
-  },
-  {
-    id: "b-zara-1",
-    kind: "pending",
-    title: "Pepsi Nigeria — TVC",
-    type: "TVC",
-    location: "Lagos",
-    start: "2026-05-01",
-    end: "2026-05-03",
-    note: "Awaiting countersigned deal memo.",
-  },
-  {
-    id: "b-zara-2",
-    kind: "option",
-    title: "Vlisco — SS26 campaign",
-    type: "Campaign",
-    location: "TBC",
-    start: "2026-05-18",
-    end: "2026-05-19",
-    note: "Second-option hold. Answer due 25 Apr.",
-  },
-  {
-    id: "hold-apr29",
-    kind: "hold",
-    title: "Personal hold — do not book",
-    start: "2026-04-29",
-    end: "2026-04-29",
-    note: "Requested by Zara · family.",
-  },
-  {
-    id: "hold-may12",
-    kind: "hold",
-    title: "Personal hold",
-    start: "2026-05-12",
-    end: "2026-05-12",
-  },
-];
-
-function bookingKind(b) {
-  if (b.status === "Confirmed" || b.status === "In Progress") return "confirmed";
-  if (b.status === "Option") return "option";
-  return "pending";
+function pad(n) {
+  return String(n).padStart(2, "0");
 }
 
-export default function CalendarPage() {
-  const me = talent.find((t) => t.id === ME_ID);
+function ym(year, month) {
+  return `${year}-${pad(month)}`;
+}
 
-  const bookingEvents = bookings
-    .filter((b) => b.talentIds?.includes(ME_ID))
-    .map((b) => ({
-      id: b.id,
-      kind: bookingKind(b),
-      title: b.client,
-      type: b.type,
-      location: b.territory,
-      start: b.date,
-      end: b.endDate || b.date,
-    }));
+export default async function CalendarPage({ searchParams }) {
+  const { month: monthParam } = await searchParams;
 
-  const castingEvents = openCastings
-    .filter((c) =>
-      c.interests?.some((i) => i.talentId === ME_ID && i.status === "interested")
-    )
-    .map((c) => {
-      const [start, end] = (c.shootDates || "").split(" to ").map((s) => s.trim());
-      return {
-        id: c.id,
-        kind: "casting",
-        title: `${c.workType || "Casting"} — ${c.location || ""}`.trim(),
-        type: c.workType,
-        location: c.location,
-        start: start || c.shootDates,
-        end: end || start || c.shootDates,
-        note: "You expressed interest — awaiting shortlist.",
-      };
-    });
-
-  const testShoots = [];
-  if (me?.portfolioStatus?.lastTestShoot) {
-    testShoots.push({
-      id: "test-last",
-      kind: "test",
-      title: "Test shoot · digitals",
-      type: "Portfolio",
-      location: "Maduka Studio · Lagos",
-      start: me.portfolioStatus.lastTestShoot,
-      end: me.portfolioStatus.lastTestShoot,
-      note: "Logged in your portfolio.",
-    });
-  }
-  if (me?.portfolioStatus?.nextScheduledShoot) {
-    testShoots.push({
-      id: "test-next",
-      kind: "test",
-      title: "Test shoot · scheduled",
-      type: "Portfolio refresh",
-      location: "Maduka Studio · Lagos",
-      start: me.portfolioStatus.nextScheduledShoot,
-      end: me.portfolioStatus.nextScheduledShoot,
-      note: "Natural light · three angles.",
-    });
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1; // 1-based
+  if (/^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam ?? "")) {
+    const [y, m] = monthParam.split("-").map(Number);
+    year = y;
+    month = m;
   }
 
-  const events = [
-    ...bookingEvents,
-    ...castingEvents,
-    ...testShoots,
-    ...EXTRA_EVENTS,
-  ];
+  const lastDay = new Date(year, month, 0).getDate();
+  const monthStart = `${year}-${pad(month)}-01`;
+  const monthEnd = `${year}-${pad(month)}-${pad(lastDay)}`;
+  const bookings = await myBookingsInRange(monthStart, monthEnd);
+
+  const prev = month === 1 ? ym(year - 1, 12) : ym(year, month - 1);
+  const next = month === 12 ? ym(year + 1, 1) : ym(year, month + 1);
+  const todayISO = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-GB", {
+    month: "long",
+  });
 
   return (
     <div>
-      <div className="flex items-baseline justify-between pb-2">
+      <div className="flex items-baseline justify-between pb-2 pt-2">
         <div className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
           Dashboard · Calendar
         </div>
         <div className="text-[11px] text-muted-foreground">
-          Lagos · GMT+1
+          {bookings.length} booking{bookings.length === 1 ? "" : "s"} this month
         </div>
       </div>
       <h2 className="font-serif text-[34px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
         <span className="editorial-italic">Calendar</span>
       </h2>
       <p className="mt-2 max-w-[58ch] text-[13px] leading-relaxed text-muted-foreground">
-        Every confirmed job, option, casting and personal hold in one view. Tap a
-        day to see what&apos;s on — holds are visible to your booker.
+        Your bookings, month by month. Colour tells you where each job stands —
+        confirmed, pending, or done.
       </p>
 
-      <div className="mt-10">
-        <CalendarView events={events} />
+      <div className="mt-10 flex items-end justify-between border-b border-border/60 pb-5">
+        <h3 className="font-serif text-[44px] font-light leading-[0.95] tracking-[-0.02em] text-foreground">
+          <span className="editorial-italic">{monthName}</span>
+          <span className="ml-3 text-muted-foreground/50">{year}</span>
+        </h3>
+        <div className="flex items-center gap-1.5">
+          <Link
+            href={`/talent/calendar?month=${prev}`}
+            aria-label="Previous month"
+            className="pressable grid h-9 w-9 place-items-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href="/talent/calendar"
+            className="pressable flex h-9 items-center rounded-full border border-border/60 px-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          >
+            Today
+          </Link>
+          <Link
+            href={`/talent/calendar?month=${next}`}
+            aria-label="Next month"
+            className="pressable grid h-9 w-9 place-items-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <CalendarView
+          year={year}
+          month={month}
+          bookings={bookings}
+          todayISO={todayISO}
+        />
       </div>
     </div>
   );

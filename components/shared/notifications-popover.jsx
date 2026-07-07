@@ -1,42 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useActions, useNotifications } from "@/lib/store";
-
-function timeAgo(iso) {
-  if (!iso) return "";
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  const diff = Math.max(0, now - then);
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "now";
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
-}
+import { relativeTime } from "@/lib/format";
 
 function kindDot(kind) {
   switch (kind) {
-    case "payment":
-      return "bg-emerald-500";
-    case "message":
-      return "bg-sky-500";
-    case "booking":
-      return "bg-amber-500";
-    case "casting":
-      return "bg-primary";
+    case "payment_update":
+      return "bg-success";
+    case "general":
+    case "announcement":
+      return "bg-bronze";
+    case "booking_update":
+    case "availability_check":
+    case "pre_job_brief":
+      return "bg-warning";
     default:
       return "bg-muted-foreground";
   }
 }
 
-export function NotificationsPopover({ trigger }) {
-  const notifications = useNotifications();
-  const { markAllNotifsRead } = useActions();
+/**
+ * Presentational notifications popover. Pass `items` as plain objects:
+ * { id, title, body, createdAt, type, isRead }. No data fetching here —
+ * callers own the data source.
+ */
+export function NotificationsPopover({ trigger, items = [] }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -50,7 +40,7 @@ export function NotificationsPopover({ trigger }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unread = items.filter((n) => !n.isRead).length;
 
   return (
     <div className="relative" ref={wrapRef}>
@@ -84,33 +74,26 @@ export function NotificationsPopover({ trigger }) {
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={markAllNotifsRead}
-              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Check className="h-3 w-3" /> Mark all read
-            </button>
           </div>
 
           <ul className="max-h-[420px] overflow-y-auto divide-y divide-border/60">
-            {notifications.length === 0 && (
+            {items.length === 0 && (
               <li className="px-4 py-10 text-center text-[12px] text-muted-foreground">
                 No notifications yet.
               </li>
             )}
-            {notifications.map((n) => (
+            {items.map((n) => (
               <li
                 key={n.id}
                 className={cn(
                   "flex items-start gap-3 px-3 py-3 transition-colors hover:bg-surface-muted/50",
-                  !n.read && "bg-primary/[0.035]"
+                  !n.isRead && "bg-primary/[0.035]"
                 )}
               >
                 <span
                   className={cn(
                     "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                    kindDot(n.kind)
+                    kindDot(n.type)
                   )}
                 />
                 <div className="min-w-0 flex-1">
@@ -119,7 +102,7 @@ export function NotificationsPopover({ trigger }) {
                       {n.title}
                     </div>
                     <div className="shrink-0 font-mono text-[10px] text-muted-foreground/70">
-                      {timeAgo(n.at)}
+                      {relativeTime(n.createdAt)}
                     </div>
                   </div>
                   <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-relaxed text-muted-foreground">

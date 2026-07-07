@@ -2,13 +2,27 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { X, ArrowUpRight, LogOut, User, Settings, Camera } from "lucide-react";
-import { useMe, useAgent } from "@/lib/store";
+import { useFormStatus } from "react-dom";
+import { X, ArrowUpRight, LogOut, User, Camera } from "lucide-react";
+import { logout } from "@/lib/actions/auth";
+import { gradientFor } from "@/lib/gradients";
+import { statusLabel } from "@/lib/format";
 
-export function ProfileModal({ open, onClose }) {
-  const me = useMe();
-  const agent = useAgent(me);
+function LogoutButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="pressable mt-5 flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border text-[12.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-60"
+    >
+      <LogOut className="h-3.5 w-3.5" />
+      {pending ? "Signing out…" : "Sign out"}
+    </button>
+  );
+}
 
+export function ProfileModal({ open, onClose, profile, talent }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -16,7 +30,14 @@ export function ProfileModal({ open, onClose }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open || !me) return null;
+  if (!open) return null;
+
+  const firstName = talent?.first_name || profile?.full_name?.split(" ")[0] || "—";
+  const fullName =
+    talent
+      ? `${talent.first_name} ${talent.last_name}`
+      : profile?.full_name || "—";
+  const joined = talent?.contract_start_date || talent?.created_at;
 
   return (
     <div
@@ -36,35 +57,62 @@ export function ProfileModal({ open, onClose }) {
           <X className="h-3.5 w-3.5" />
         </button>
 
-        <div className="h-[96px] bg-gradient-to-br from-primary/25 via-chart-2/20 to-chart-5/20" />
+        <div
+          className="h-[96px]"
+          style={{ background: gradientFor(talent?.id || profile?.id || "candor") }}
+        />
 
         <div className="px-6 pb-6">
           <div className="-mt-10 flex items-end gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-foreground text-[20px] font-serif italic text-background shadow-[var(--shadow-lift)] ring-4 ring-background">
-              {me.stageName?.[0] || me.name?.[0]}
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-[20px] font-serif italic text-background shadow-[var(--shadow-lift)] ring-4 ring-background">
+              {talent?.polaroid_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={talent.polaroid_url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                firstName[0]
+              )}
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-                {me.board} · {me.category}
+                {talent
+                  ? `${statusLabel(talent.category)} · ${statusLabel(talent.primary_location)}`
+                  : "Candor · Talent"}
               </div>
-              <div className="font-serif text-[24px] font-light italic leading-tight text-foreground">
-                {me.stageName}
+              <div className="truncate font-serif text-[24px] font-light italic leading-tight text-foreground">
+                {firstName}
               </div>
-              <div className="text-[11.5px] text-muted-foreground">
-                {me.name} · {me.location}
+              <div className="truncate text-[11.5px] text-muted-foreground">
+                {fullName}
+                {profile?.email ? ` · ${profile.email}` : ""}
               </div>
             </div>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-0 divide-x divide-border/60 border-y border-border/60 py-3">
-            <Stat label="Status" value={me.status} />
-            <Stat label="Joined" value={new Date(me.joinDate).getFullYear()} />
-            <Stat label="Agent" value={agent?.short || "—"} />
+            <Stat label="Status" value={statusLabel(talent?.status) || "—"} />
+            <Stat
+              label="Joined"
+              value={joined ? new Date(joined).getFullYear() : "—"}
+            />
+            <Stat
+              label="Contract"
+              value={
+                talent?.contract_type
+                  ? statusLabel(talent.contract_type).split(" ")[0]
+                  : "—"
+              }
+            />
           </div>
 
-          <p className="mt-4 text-[12.5px] leading-relaxed text-muted-foreground">
-            {me.bio}
-          </p>
+          {talent?.bio && (
+            <p className="mt-4 line-clamp-4 text-[12.5px] leading-relaxed text-muted-foreground">
+              {talent.bio}
+            </p>
+          )}
 
           <div className="mt-5 space-y-0.5">
             <Row
@@ -72,7 +120,7 @@ export function ProfileModal({ open, onClose }) {
               onClose={onClose}
               icon={Camera}
               label="Portfolio"
-              sub="Comp card, selected works, tearsheets"
+              sub="Measurements, comp card, selected works"
             />
             <Row
               href="/talent/directory"
@@ -81,23 +129,11 @@ export function ProfileModal({ open, onClose }) {
               label="Talent directory"
               sub="The Candor roster"
             />
-            <Row
-              href="#"
-              onClose={onClose}
-              icon={Settings}
-              label="Account settings"
-              sub="Notifications, payouts, privacy"
-            />
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-5 flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border text-[12.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Sign out
-          </button>
+          <form action={logout}>
+            <LogoutButton />
+          </form>
         </div>
       </div>
     </div>
@@ -110,7 +146,7 @@ function Stat({ label, value }) {
       <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
         {label}
       </div>
-      <div className="mt-1 font-serif text-[15px] italic text-foreground">
+      <div className="mt-1 truncate font-serif text-[15px] italic text-foreground">
         {value}
       </div>
     </div>

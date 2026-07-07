@@ -1,182 +1,215 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Mail, Phone, Search, X } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Mail, Phone, Plus, Search, X } from "lucide-react";
+import { createClient_ } from "@/lib/actions/clients";
+import { dateShort, statusLabel } from "@/lib/format";
+import { StatusPill, EmptyRow } from "@/components/admin/kit";
+import {
+  Field,
+  FormError,
+  SubmitButton,
+  inputClass,
+} from "@/components/admin/form-kit";
 
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "Active", label: "Active" },
-  { id: "Pending", label: "Pending" },
+const TYPE_FILTERS = [
+  { id: "", label: "All" },
+  { id: "new", label: "New" },
+  { id: "established", label: "Established" },
 ];
 
-function parseMoney(s) {
-  return Number(String(s).replace(/[^0-9.-]/g, "")) || 0;
+function filterHref({ q, type }) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (type) params.set("type", type);
+  const s = params.toString();
+  return `/admin/clients${s ? `?${s}` : ""}`;
 }
 
-export function ClientsList({ clients }) {
-  const [filter, setFilter] = useState("all");
-  const [query, setQuery] = useState("");
-
-  const counts = useMemo(() => {
-    const c = { all: clients.length };
-    clients.forEach((cl) => {
-      c[cl.status] = (c[cl.status] || 0) + 1;
-    });
-    return c;
-  }, [clients]);
-
-  const filtered = useMemo(() => {
-    return clients.filter((c) => {
-      if (filter !== "all" && c.status !== filter) return false;
-      if (!query.trim()) return true;
-      const q = query.trim().toLowerCase();
-      return (
-        c.name.toLowerCase().includes(q) ||
-        c.contactPerson?.toLowerCase().includes(q) ||
-        c.type?.toLowerCase().includes(q)
-      );
-    });
-  }, [clients, filter, query]);
+export function ClientsList({ clients, q = "", type = "" }) {
+  const [showCreate, setShowCreate] = useState(false);
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          {FILTERS.map((f) => {
-            const active = filter === f.id;
+          {TYPE_FILTERS.map((f) => {
+            const active = type === f.id;
             return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
+              <Link
+                key={f.id || "all"}
+                href={filterHref({ q, type: f.id })}
+                className={`pressable inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
                   active
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {f.label}
-                <span
-                  className={`font-mono text-[9.5px] ${
-                    active ? "text-background/70" : "text-muted-foreground/60"
-                  }`}
-                >
-                  {counts[f.id] ?? 0}
-                </span>
-              </button>
+              </Link>
             );
           })}
         </div>
-        <div className="ml-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground focus-within:border-foreground/50">
+        <form
+          action="/admin/clients"
+          className="ml-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground focus-within:border-foreground/50"
+        >
+          {type && <input type="hidden" name="type" value={type} />}
           <Search className="h-3 w-3" />
           <input
             type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search clients"
+            name="q"
+            defaultValue={q}
+            placeholder="Search company name"
             className="w-44 bg-transparent text-[11.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
           />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Clear"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+          <button
+            type="submit"
+            className="pressable text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+          >
+            Go
+          </button>
+        </form>
+        <button
+          type="button"
+          onClick={() => setShowCreate((v) => !v)}
+          className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[11px] font-medium uppercase tracking-[0.14em] text-background"
+        >
+          {showCreate ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+          {showCreate ? "Close" : "Add client"}
+        </button>
       </div>
 
+      {showCreate && <CreateClientForm onDone={() => setShowCreate(false)} />}
+
       <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
-        {filtered.map((c, i) => {
-          const outstanding = parseMoney(c.outstanding);
-          return (
-            <li key={c.id} className="py-5">
-              <div className="grid grid-cols-12 items-start gap-x-4">
-                <div className="col-span-1 font-mono text-[10px] text-muted-foreground/60">
-                  №{String(i + 1).padStart(3, "0")}
+        {clients.map((c, i) => (
+          <li key={c.id}>
+            <Link
+              href={`/admin/clients/${c.id}`}
+              className="group grid grid-cols-12 items-start gap-x-4 py-5 transition-colors hover:bg-muted/30"
+            >
+              <div className="col-span-1 font-mono text-[10px] text-muted-foreground/60">
+                №{String(i + 1).padStart(3, "0")}
+              </div>
+              <div className="col-span-5 min-w-0">
+                <div className="flex items-baseline gap-3">
+                  <h3 className="truncate font-serif text-[20px] font-light text-foreground">
+                    {c.company_name}
+                  </h3>
+                  <span className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    {statusLabel(c.client_type)}
+                  </span>
                 </div>
-                <div className="col-span-5 min-w-0">
-                  <div className="flex items-baseline gap-3">
-                    <h3 className="truncate font-serif text-[20px] font-light text-foreground">
-                      {c.name}
-                    </h3>
-                    <span className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                      {c.clientType}
-                    </span>
-                  </div>
+                {c.contact_person && (
                   <div className="mt-1 text-[11.5px] text-muted-foreground">
-                    {c.contactPerson}
+                    {c.contact_person}
                   </div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground/80">
+                )}
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground/80">
+                  {c.email && (
                     <span className="inline-flex items-center gap-1">
                       <Mail className="h-3 w-3" /> {c.email}
                     </span>
+                  )}
+                  {c.phone && (
                     <span className="inline-flex items-center gap-1">
                       <Phone className="h-3 w-3" /> {c.phone}
                     </span>
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Type
-                  </div>
-                  <div className="mt-0.5 text-[12px] text-foreground">{c.type}</div>
-                  <div className="mt-2 text-[10.5px] text-muted-foreground">
-                    Terms · {c.paymentTerms}
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Bookings
-                  </div>
-                  <div className="mt-0.5 font-serif text-[22px] font-light leading-none text-foreground">
-                    {c.totalBookings}
-                  </div>
-                  <div className="mt-1 text-[10.5px] text-muted-foreground">
-                    Since {c.joinDate}
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Outstanding
-                  </div>
-                  <div
-                    className={`mt-0.5 font-serif text-[17px] font-light ${
-                      outstanding > 0
-                        ? "text-rose-700 dark:text-rose-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {outstanding > 0 ? c.outstanding : "—"}
-                  </div>
-                  <div
-                    className={`mt-1 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${
-                      c.status === "Active"
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        c.status === "Active" ? "bg-emerald-500" : "bg-muted-foreground"
-                      }`}
-                    />
-                    {c.status}
-                  </div>
+                  )}
                 </div>
               </div>
-            </li>
-          );
-        })}
-        {filtered.length === 0 && (
-          <li className="py-10 text-center text-[12px] text-muted-foreground">
-            No clients match.
+              <div className="col-span-2">
+                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Terms
+                </div>
+                <div className="mt-0.5 text-[12px] text-foreground">
+                  {c.payment_terms || "—"}
+                </div>
+              </div>
+              <div className="col-span-2 text-right">
+                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Bookings
+                </div>
+                <div
+                  data-slot="numeric"
+                  className="mt-0.5 font-serif text-[22px] font-light leading-none text-foreground"
+                >
+                  {c.bookingsCount ?? 0}
+                </div>
+                <div className="mt-1 text-[10.5px] text-muted-foreground">
+                  Since {dateShort(c.created_at)}
+                </div>
+              </div>
+              <div className="col-span-2 flex items-start justify-end gap-2 text-right">
+                <StatusPill
+                  status={c.is_active ? "active" : "inactive"}
+                  accent={c.is_active ? "success" : "muted"}
+                />
+                <ArrowUpRight className="mt-0.5 h-3 w-3 text-muted-foreground/40 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </div>
+            </Link>
           </li>
+        ))}
+        {clients.length === 0 && (
+          <EmptyRow>No clients yet — add the first one above.</EmptyRow>
         )}
       </ul>
     </>
+  );
+}
+
+function CreateClientForm({ onDone }) {
+  const [state, action, pending] = useActionState(createClient_, undefined);
+
+  useEffect(() => {
+    if (state?.success) onDone();
+  }, [state, onDone]);
+
+  return (
+    <form
+      action={action}
+      className="mt-5 space-y-4 rounded-sm border border-border/60 bg-muted/20 p-5"
+    >
+      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        New client
+      </div>
+      <FormError error={state?.error} />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Field label="Company name *">
+          <input name="companyName" required className={inputClass} />
+        </Field>
+        <Field label="Contact person">
+          <input name="contactPerson" className={inputClass} />
+        </Field>
+        <Field label="Email">
+          <input name="email" type="email" className={inputClass} />
+        </Field>
+        <Field label="Phone">
+          <input name="phone" className={inputClass} />
+        </Field>
+        <Field label="Client type">
+          <select name="clientType" defaultValue="new" className={inputClass}>
+            <option value="new">New — 100% upfront</option>
+            <option value="established">Established — Net 14</option>
+          </select>
+        </Field>
+        <Field label="Payment terms" hint="Leave blank for the house default.">
+          <input name="paymentTerms" className={inputClass} placeholder="e.g. Net 14" />
+        </Field>
+      </div>
+      <Field label="Address">
+        <input name="address" className={inputClass} />
+      </Field>
+      <Field label="Notes">
+        <textarea name="notes" rows={2} className={`${inputClass} resize-none`} />
+      </Field>
+      <div className="flex justify-end">
+        <SubmitButton pending={pending}>
+          {pending ? "Saving…" : "Add client"}
+        </SubmitButton>
+      </div>
+    </form>
   );
 }

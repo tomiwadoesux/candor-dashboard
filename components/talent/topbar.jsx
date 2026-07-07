@@ -1,33 +1,30 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { NotificationsPopover } from "@/components/shared/notifications-popover";
 import { ProfileModal } from "@/components/talent/profile-modal";
-import { useMe } from "@/lib/store";
 
-export function TalentTopbar() {
-  const [theme, setTheme] = useState("light");
+export function TalentTopbar({ profile, talent, unread = 0 }) {
   const [profileOpen, setProfileOpen] = useState(false);
-  const me = useMe();
 
+  // The .dark class on <html> is the single source of truth — the icons flip
+  // via CSS dark: variants, so no theme state lives in React.
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("candor-theme") : null;
+    const stored = localStorage.getItem("candor-theme");
     const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    const initial = stored || (prefersDark ? "dark" : "light");
-    setTheme(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
+    const dark = stored ? stored === "dark" : Boolean(prefersDark);
+    document.documentElement.classList.toggle("dark", dark);
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-    localStorage.setItem("candor-theme", next);
+    const next = !document.documentElement.classList.contains("dark");
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("candor-theme", next ? "dark" : "light");
   };
 
-  const initial = me?.stageName?.[0] || me?.name?.[0] || "Z";
+  const initial =
+    talent?.first_name?.[0] || profile?.full_name?.[0] || "C";
 
   return (
     <>
@@ -36,31 +33,35 @@ export function TalentTopbar() {
           type="button"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-muted text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground"
+          className="pressable flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-muted text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground"
         >
           <span className="relative flex h-3.5 w-3.5 items-center justify-center">
-            <Sun
-              className={cn(
-                "absolute h-3.5 w-3.5 transition-all duration-300",
-                theme === "dark" ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
-              )}
-            />
-            <Moon
-              className={cn(
-                "absolute h-3.5 w-3.5 transition-all duration-300",
-                theme === "dark" ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
-              )}
-            />
+            <Sun className="absolute h-3.5 w-3.5 rotate-0 scale-100 opacity-100 transition-[transform,opacity] duration-200 ease-out dark:rotate-90 dark:scale-90 dark:opacity-0" />
+            <Moon className="absolute h-3.5 w-3.5 -rotate-90 scale-90 opacity-0 transition-[transform,opacity] duration-200 ease-out dark:rotate-0 dark:scale-100 dark:opacity-100" />
           </span>
         </button>
 
-        <NotificationsPopover />
+        <Link
+          href="/talent/communications"
+          aria-label={
+            unread > 0 ? `Communications — ${unread} unread` : "Communications"
+          }
+          className="pressable relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-muted text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground"
+        >
+          <Bell className="h-3.5 w-3.5" />
+          {unread > 0 && (
+            <span
+              aria-hidden
+              className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-bronze"
+            />
+          )}
+        </Link>
 
         <button
           type="button"
           onClick={() => setProfileOpen(true)}
           aria-label="Open profile"
-          className="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-[12px] font-medium text-background ring-1 ring-border transition-transform hover:scale-105"
+          className="pressable relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-[12px] font-medium text-background ring-1 ring-border transition-transform hover:scale-105"
         >
           {initial}
           <span
@@ -70,7 +71,12 @@ export function TalentTopbar() {
         </button>
       </header>
 
-      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+      <ProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={profile}
+        talent={talent}
+      />
     </>
   );
 }

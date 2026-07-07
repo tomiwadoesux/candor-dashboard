@@ -1,325 +1,166 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Lock, MapPin, XCircle } from "lucide-react";
+import { closeCasting } from "@/lib/actions/castings";
+import { dateShort, relativeTime, statusLabel } from "@/lib/format";
+import { StatusPill, EmptyRow } from "@/components/admin/kit";
 
-const TODAY = new Date("2026-04-18T00:00:00");
-
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "Open", label: "Open" },
-  { id: "Closed", label: "Closed" },
+const STATUS_FILTERS = [
+  { id: "", label: "All" },
+  { id: "open", label: "Open" },
+  { id: "closed", label: "Closed" },
+  { id: "cancelled", label: "Cancelled" },
 ];
 
-function parseDate(d) {
-  return new Date(`${d}T00:00:00`);
+function castingAccent(status) {
+  if (status === "open") return "success";
+  if (status === "cancelled") return "destructive";
+  return "muted";
 }
 
-function daysUntil(d) {
-  const diff = Math.round((parseDate(d) - TODAY) / 86400000);
-  return diff;
-}
+export function CastingBoard({ castings, status = "" }) {
+  const [pendingId, setPendingId] = useState(null);
+  const [error, setError] = useState(null);
+  const [, startTransition] = useTransition();
 
-function fmtDateRange(s) {
-  if (!s) return "—";
-  if (s.includes(" to ")) {
-    const [a, b] = s.split(" to ");
-    const ad = parseDate(a);
-    const bd = parseDate(b);
-    const sameMonth = ad.getMonth() === bd.getMonth();
-    const month = ad.toLocaleString("en-GB", { month: "short" });
-    if (sameMonth) return `${ad.getDate()}–${bd.getDate()} ${month}`;
-    return `${ad.getDate()} ${month} – ${bd.getDate()} ${bd.toLocaleString(
-      "en-GB",
-      { month: "short" }
-    )}`;
+  function handleClose(id, title) {
+    if (!confirm(`Close "${title}"? It disappears from the talent board immediately.`)) return;
+    setError(null);
+    setPendingId(id);
+    startTransition(async () => {
+      const result = await closeCasting(id);
+      if (result?.error) setError(result.error);
+      setPendingId(null);
+    });
   }
-  const d = parseDate(s);
-  return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
-}
-
-export function CastingBoard({ castings, talent }) {
-  const [filter, setFilter] = useState("all");
-  const [expanded, setExpanded] = useState(null);
-
-  const counts = useMemo(() => {
-    const c = { all: castings.length };
-    castings.forEach((k) => {
-      c[k.status] = (c[k.status] || 0) + 1;
-    });
-    return c;
-  }, [castings]);
-
-  const filtered = useMemo(() => {
-    const sorted = [...castings].sort(
-      (a, b) => new Date(a.deadline) - new Date(b.deadline)
-    );
-    if (filter === "all") return sorted;
-    return sorted.filter((k) => k.status === filter);
-  }, [castings, filter]);
-
-  const talentById = useMemo(() => {
-    const m = {};
-    talent.forEach((t) => {
-      m[t.id] = t;
-    });
-    return m;
-  }, [talent]);
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-1.5">
-        {FILTERS.map((f) => {
-          const active = filter === f.id;
+        {STATUS_FILTERS.map((f) => {
+          const active = status === f.id;
           return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setFilter(f.id)}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
+            <Link
+              key={f.id || "all"}
+              href={f.id ? `/admin/casting?status=${f.id}` : "/admin/casting"}
+              className={`pressable inline-flex items-center rounded-full border px-3 py-1 text-[11px] transition-colors ${
                 active
                   ? "border-foreground bg-foreground text-background"
                   : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
               }`}
             >
               {f.label}
-              <span
-                className={`font-mono text-[9.5px] ${
-                  active ? "text-background/70" : "text-muted-foreground/60"
-                }`}
-              >
-                {counts[f.id] ?? 0}
-              </span>
-            </button>
+            </Link>
           );
         })}
       </div>
 
-      <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
-        {filtered.map((k, i) => {
-          const daysToDeadline = daysUntil(k.deadline);
-          const interestedCount = k.interests?.length || 0;
-          const shortlistedCount = k.shortlisted?.length || 0;
-          const selectedCount = k.selected?.length || 0;
-          const isOpen = expanded === k.id;
-          const urgent = daysToDeadline >= 0 && daysToDeadline <= 3 && k.status === "Open";
+      {error && (
+        <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-[12px] text-destructive">
+          {error}
+        </div>
+      )}
 
-          return (
-            <li key={k.id}>
+      <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
+        {castings.map((c, i) => (
+          <li key={c.id} className="group relative">
+            <Link
+              href={`/admin/casting/${c.id}`}
+              className="grid grid-cols-12 items-start gap-x-4 py-5 transition-colors hover:bg-muted/30"
+            >
+              <div className="col-span-1 font-mono text-[10px] text-muted-foreground/60">
+                №{String(i + 1).padStart(2, "0")}
+              </div>
+              <div className="col-span-5 min-w-0">
+                <h3 className="truncate font-serif text-[20px] font-light text-foreground">
+                  {c.title}
+                </h3>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span className="uppercase tracking-[0.1em]">
+                    {statusLabel(c.category)}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {statusLabel(c.location)}
+                  </span>
+                  {c.work_type && <span>{c.work_type}</span>}
+                </div>
+                {(c.brand_name_internal || c.client) && (
+                  <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-sm bg-warning/10 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-warning">
+                    <Lock className="h-2.5 w-2.5" />
+                    Internal · {c.brand_name_internal || c.client?.company_name}
+                    {c.brand_name_internal && c.client
+                      ? ` (${c.client.company_name})`
+                      : ""}
+                  </div>
+                )}
+              </div>
+              <div className="col-span-2">
+                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Shoot
+                </div>
+                <div className="mt-0.5 font-mono text-[11px] text-foreground">
+                  {dateShort(c.shoot_date_start)}
+                  {c.shoot_date_end ? ` – ${dateShort(c.shoot_date_end)}` : ""}
+                </div>
+                <div className="mt-1.5 text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Deadline
+                </div>
+                <div className="mt-0.5 font-mono text-[11px] text-foreground">
+                  {dateShort(c.deadline)}{" "}
+                  <span className="text-muted-foreground/70">
+                    ({relativeTime(c.deadline)})
+                  </span>
+                </div>
+              </div>
+              <div className="col-span-2 text-right">
+                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Interest
+                </div>
+                <div
+                  data-slot="numeric"
+                  className="mt-0.5 font-serif text-[22px] font-light leading-none text-foreground"
+                >
+                  {c.interestedCount ?? 0}
+                  <span className="text-[13px] text-muted-foreground">
+                    /{c.responsesCount ?? 0}
+                  </span>
+                </div>
+                <div className="mt-1 text-[10.5px] text-muted-foreground">responses</div>
+              </div>
+              <div className="col-span-2 flex items-start justify-end gap-2">
+                <StatusPill status={c.status} accent={castingAccent(c.status)} />
+                <ArrowUpRight className="mt-0.5 h-3 w-3 text-muted-foreground/40 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </div>
+            </Link>
+            {c.status === "open" && (
               <button
                 type="button"
-                onClick={() => setExpanded(isOpen ? null : k.id)}
-                className="group grid w-full grid-cols-12 items-start gap-x-4 py-5 text-left transition-colors hover:bg-muted/30"
+                disabled={pendingId === c.id}
+                onClick={() => handleClose(c.id, c.title)}
+                className="pressable absolute bottom-4 right-0 inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground opacity-0 transition-opacity hover:border-destructive/40 hover:text-destructive group-hover:opacity-100 disabled:opacity-60"
               >
-                <div className="col-span-1 pl-2 font-mono text-[10px] text-muted-foreground/60">
-                  №{String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="col-span-6 min-w-0">
-                  <div className="flex items-baseline gap-3">
-                    <h3 className="truncate font-serif text-[20px] font-light text-foreground">
-                      {k.brandName}
-                    </h3>
-                    <span
-                      className={`shrink-0 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${
-                        k.status === "Open"
-                          ? "text-emerald-700 dark:text-emerald-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          k.status === "Open"
-                            ? "bg-emerald-500"
-                            : "bg-muted-foreground"
-                        }`}
-                      />
-                      {k.status}
-                    </span>
-                  </div>
-                  <div className="mt-1 truncate text-[12px] text-muted-foreground">
-                    {k.title}
-                  </div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground/80">
-                    <span className="uppercase tracking-[0.1em]">{k.workType}</span>
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {k.location}
-                    </span>
-                    <span>Shoot · {fmtDateRange(k.shootDates)}</span>
-                  </div>
-                </div>
-                <div className="col-span-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <PipelineTile label="Interest" value={interestedCount} />
-                    <PipelineTile label="Short" value={shortlistedCount} />
-                    <PipelineTile
-                      label="Picked"
-                      value={selectedCount}
-                      accent={selectedCount > 0 ? "emerald" : null}
-                    />
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Deadline
-                  </div>
-                  <div
-                    className={`mt-0.5 font-serif text-[18px] font-light leading-none ${
-                      urgent
-                        ? "text-rose-700 dark:text-rose-400"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {fmtDateRange(k.deadline)}
-                  </div>
-                  <div
-                    className={`mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] ${
-                      urgent
-                        ? "text-rose-700 dark:text-rose-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    <Clock className="h-3 w-3" />
-                    {daysToDeadline >= 0
-                      ? `${daysToDeadline}d to go`
-                      : `${-daysToDeadline}d past`}
-                  </div>
-                </div>
+                <XCircle className="h-3 w-3" />
+                {pendingId === c.id ? "Closing…" : "Close"}
               </button>
-
-              {isOpen && (
-                <div className="grid grid-cols-12 gap-x-4 px-2 pb-6">
-                  <div className="col-span-1" />
-                  <div className="col-span-11 space-y-4 rounded-sm bg-muted/30 p-5">
-                    <div>
-                      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                        Brief
-                      </div>
-                      <p className="mt-1 font-serif text-[14.5px] font-light leading-relaxed text-foreground">
-                        {k.description}
-                      </p>
-                      <div className="mt-2 text-[11px] text-muted-foreground">
-                        Requirements · {k.requirements}
-                      </div>
-                      <div className="mt-0.5 text-[11px] text-muted-foreground">
-                        Usage · {k.mediaUsage}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      <InterestColumn
-                        title="Expressed interest"
-                        members={k.interests || []}
-                        talentById={talentById}
-                      />
-                      <InterestColumn
-                        title="Shortlisted"
-                        members={(k.shortlisted || []).map((id) => ({
-                          talentId: id,
-                          talentName: talentById[id]?.stageName || id,
-                          status: "shortlisted",
-                        }))}
-                        talentById={talentById}
-                        highlight
-                      />
-                      <InterestColumn
-                        title="Selected"
-                        members={(k.selected || []).map((id) => ({
-                          talentId: id,
-                          talentName: talentById[id]?.stageName || id,
-                          status: "selected",
-                        }))}
-                        talentById={talentById}
-                        success
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        })}
-        {filtered.length === 0 && (
-          <li className="py-10 text-center text-[12px] text-muted-foreground">
-            No castings match.
+            )}
           </li>
+        ))}
+        {castings.length === 0 && (
+          <EmptyRow>
+            No castings on the wall —{" "}
+            <Link
+              href="/admin/casting/new"
+              className="underline transition-colors hover:text-foreground"
+            >
+              post the first brief
+            </Link>
+            .
+          </EmptyRow>
         )}
       </ul>
     </>
-  );
-}
-
-function PipelineTile({ label, value, accent }) {
-  const color =
-    accent === "emerald"
-      ? "text-emerald-700 dark:text-emerald-400"
-      : "text-foreground";
-  return (
-    <div>
-      <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground/70">
-        {label}
-      </div>
-      <div className={`mt-0.5 font-serif text-[18px] font-light leading-none ${color}`}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function InterestColumn({ title, members, talentById, highlight, success }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between border-b border-border/60 pb-1.5">
-        <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-          {title}
-        </span>
-        <span className="font-mono text-[9.5px] text-muted-foreground/60">
-          {members.length}
-        </span>
-      </div>
-      {members.length === 0 ? (
-        <p className="mt-3 text-[11.5px] italic text-muted-foreground">
-          No one yet.
-        </p>
-      ) : (
-        <ul className="mt-3 space-y-2">
-          {members.map((m) => {
-            const t = talentById[m.talentId];
-            const name = t?.stageName || m.talentName;
-            return (
-              <li
-                key={m.talentId + (m.status || "")}
-                className="flex items-center gap-2.5"
-              >
-                <span
-                  className={`grid h-7 w-7 place-items-center rounded-full font-serif text-[11px] font-light italic ring-1 ${
-                    success
-                      ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/40 dark:text-emerald-400"
-                      : highlight
-                      ? "bg-foreground/5 text-foreground ring-border"
-                      : "bg-muted/50 text-foreground ring-border/60"
-                  }`}
-                >
-                  {t?.avatar || name.slice(0, 2).toUpperCase()}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[12px] text-foreground">
-                    {name}
-                  </div>
-                  {m.status && m.status !== "shortlisted" && m.status !== "selected" && (
-                    <div className="text-[10px] text-muted-foreground">
-                      {m.hasConflict ? "Conflict flagged" : m.status.replace("_", " ")}
-                    </div>
-                  )}
-                </div>
-                {success && (
-                  <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
   );
 }

@@ -1,210 +1,207 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Check, Hash } from "lucide-react";
+import {
+  markClientPaid,
+  markTalentPaid,
+  setInvoiceNumber,
+} from "@/lib/actions/payments";
+import { dateShort, money } from "@/lib/format";
+import { StatusPill, paymentAccent, EmptyRow } from "@/components/admin/kit";
 
-const TODAY = new Date("2026-04-18T00:00:00");
-
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "Draft", label: "Draft" },
-  { id: "Sent", label: "Sent" },
-  { id: "Paid", label: "Paid" },
-  { id: "Overdue", label: "Overdue" },
+const STATUS_FILTERS = [
+  { id: "", label: "All" },
+  { id: "awaiting_client_payment", label: "Awaiting client" },
+  { id: "client_paid", label: "Client paid" },
+  { id: "talent_paid", label: "Talent paid" },
 ];
 
-function parseMoney(s) {
-  return Number(String(s).replace(/[^0-9.-]/g, "")) || 0;
-}
+export function InvoiceRegister({ payments, status = "", canManage = false }) {
+  const [error, setError] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+  const [invoiceEditId, setInvoiceEditId] = useState(null);
+  const [invoiceDraft, setInvoiceDraft] = useState("");
+  const [, startTransition] = useTransition();
 
-function fmtDate(s) {
-  if (!s) return "—";
-  const d = new Date(`${s}T00:00:00`);
-  return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
-}
-
-function statusTone(s) {
-  switch (s) {
-    case "Paid":
-      return "text-emerald-700 dark:text-emerald-400";
-    case "Overdue":
-      return "text-rose-700 dark:text-rose-400";
-    case "Sent":
-      return "text-sky-700 dark:text-sky-400";
-    default:
-      return "text-muted-foreground";
+  function run(id, fn) {
+    setError(null);
+    setBusyId(id);
+    startTransition(async () => {
+      const result = await fn();
+      if (result?.error) setError(result.error);
+      setBusyId(null);
+    });
   }
-}
-
-function statusDot(s) {
-  switch (s) {
-    case "Paid":
-      return "bg-emerald-500";
-    case "Overdue":
-      return "bg-rose-500";
-    case "Sent":
-      return "bg-sky-500";
-    default:
-      return "bg-muted-foreground";
-  }
-}
-
-function daysPastDue(s) {
-  if (!s) return 0;
-  const d = new Date(`${s}T00:00:00`);
-  return Math.round((TODAY - d) / 86400000);
-}
-
-export function InvoiceRegister({ invoices }) {
-  const [filter, setFilter] = useState("all");
-  const [query, setQuery] = useState("");
-
-  const counts = useMemo(() => {
-    const c = { all: invoices.length };
-    invoices.forEach((inv) => {
-      c[inv.status] = (c[inv.status] || 0) + 1;
-    });
-    return c;
-  }, [invoices]);
-
-  const filtered = useMemo(() => {
-    const sorted = [...invoices].sort((a, b) => {
-      const order = { Overdue: 0, Sent: 1, Draft: 2, Paid: 3 };
-      return (order[a.status] ?? 4) - (order[b.status] ?? 4);
-    });
-    return sorted.filter((inv) => {
-      if (filter !== "all" && inv.status !== filter) return false;
-      if (!query.trim()) return true;
-      const q = query.trim().toLowerCase();
-      return (
-        inv.id.toLowerCase().includes(q) ||
-        inv.client.toLowerCase().includes(q)
-      );
-    });
-  }, [invoices, filter, query]);
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {FILTERS.map((f) => {
-            const active = filter === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
-                  active
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                }`}
-              >
-                {f.label}
-                <span
-                  className={`font-mono text-[9.5px] ${
-                    active ? "text-background/70" : "text-muted-foreground/60"
-                  }`}
-                >
-                  {counts[f.id] ?? 0}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="ml-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground focus-within:border-foreground/50">
-          <Search className="h-3 w-3" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Invoice № or client"
-            className="w-44 bg-transparent text-[11.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Clear"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
-        {filtered.map((inv) => {
-          const overdue = inv.status === "Overdue";
-          const past = overdue ? daysPastDue(inv.dueDate) : 0;
+      <div className="flex flex-wrap items-center gap-1.5">
+        {STATUS_FILTERS.map((f) => {
+          const active = status === f.id;
           return (
-            <li key={inv.id}>
-              <div className="relative grid grid-cols-12 items-start gap-x-4 py-5">
-                {overdue && (
-                  <span className="absolute left-0 top-5 h-10 w-[2px] bg-rose-500" />
-                )}
-                <div className="col-span-2 pl-4">
-                  <div className="font-mono text-[11px] tracking-wider text-muted-foreground/80">
-                    {inv.id}
-                  </div>
-                  <div className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground/60">
-                    {fmtDate(inv.issuedDate)}
-                    {inv.dueDate && ` · due ${fmtDate(inv.dueDate)}`}
-                  </div>
-                </div>
-                <div className="col-span-4 min-w-0">
-                  <h3 className="truncate font-serif text-[19px] font-light text-foreground">
-                    {inv.client}
-                  </h3>
-                  <div
-                    className={`mt-1 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${statusTone(
-                      inv.status
-                    )}`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusDot(inv.status)}`}
-                    />
-                    {inv.status}
-                    {overdue && past > 0 && (
-                      <span className="ml-1 font-mono text-[9.5px] text-rose-700/80 dark:text-rose-400/80">
-                        {past}d past
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Gross
-                  </div>
-                  <div className="mt-0.5 font-serif text-[17px] font-light text-foreground">
-                    {inv.amount}
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Commission
-                  </div>
-                  <div className="mt-0.5 font-mono text-[13px] text-emerald-700 dark:text-emerald-400">
-                    {inv.commission}
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                    Talent pay
-                  </div>
-                  <div className="mt-0.5 font-mono text-[13px] text-foreground">
-                    {inv.talentPay}
-                  </div>
-                </div>
-              </div>
-            </li>
+            <Link
+              key={f.id || "all"}
+              href={f.id ? `/admin/invoicing?status=${f.id}` : "/admin/invoicing"}
+              className={`pressable inline-flex items-center rounded-full border px-3 py-1 text-[11px] transition-colors ${
+                active
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+              }`}
+            >
+              {f.label}
+            </Link>
           );
         })}
-        {filtered.length === 0 && (
-          <li className="py-10 text-center text-[12px] text-muted-foreground">
-            No invoices match.
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-[12px] text-destructive">
+          {error}
+        </div>
+      )}
+
+      <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
+        {payments.map((p) => (
+          <li key={p.id} className="py-5">
+            <div className="grid grid-cols-12 items-start gap-x-4">
+              <div className="col-span-2">
+                {invoiceEditId === p.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      run(p.id, async () => {
+                        const result = await setInvoiceNumber(p.id, invoiceDraft);
+                        if (!result?.error) setInvoiceEditId(null);
+                        return result;
+                      });
+                    }}
+                    className="flex items-center gap-1"
+                  >
+                    <input
+                      autoFocus
+                      value={invoiceDraft}
+                      onChange={(e) => setInvoiceDraft(e.target.value)}
+                      placeholder="CAN-2026-001"
+                      className="w-28 rounded-sm border border-dashed border-border bg-card/60 px-1.5 py-0.5 font-mono text-[11px] text-foreground focus:border-foreground focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={busyId === p.id}
+                      className="pressable text-muted-foreground hover:text-success disabled:opacity-50"
+                      aria-label="Save invoice number"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[11px] text-muted-foreground/80">
+                      {p.invoice_number || "No invoice №"}
+                    </span>
+                    {canManage && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInvoiceEditId(p.id);
+                          setInvoiceDraft(p.invoice_number || "");
+                        }}
+                        className="pressable text-muted-foreground/60 transition-colors hover:text-foreground"
+                        aria-label="Edit invoice number"
+                        title="Set invoice number"
+                      >
+                        <Hash className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
+                <div className="mt-1.5 font-mono text-[10px] text-muted-foreground/70">
+                  Raised {dateShort(p.created_at)}
+                </div>
+              </div>
+
+              <div className="col-span-4 min-w-0">
+                <Link
+                  href={p.booking ? `/admin/bookings/${p.booking.id}` : "/admin/bookings"}
+                  className="group inline-flex max-w-full items-baseline gap-1.5"
+                >
+                  <span className="truncate font-serif text-[17px] font-light text-foreground group-hover:underline">
+                    {p.booking?.project_title || "Booking"}
+                  </span>
+                  <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
+                </Link>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  {p.talent ? `${p.talent.first_name} ${p.talent.last_name}` : "—"}
+                  {p.booking?.client ? ` · ${p.booking.client.company_name}` : ""}
+                </div>
+                <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
+                  Job date {dateShort(p.booking?.booking_date)}
+                </div>
+              </div>
+
+              <div className="col-span-2 text-right">
+                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  Gross
+                </div>
+                <div
+                  data-slot="numeric"
+                  className="mt-0.5 font-serif text-[17px] font-light text-foreground"
+                >
+                  {money(p.gross_fee, p.currency)}
+                </div>
+                <div data-slot="numeric" className="mt-0.5 font-mono text-[10.5px] text-bronze">
+                  comm {money(p.commission_amount, p.currency)}
+                </div>
+                <div
+                  data-slot="numeric"
+                  className="font-mono text-[10.5px] text-muted-foreground"
+                >
+                  net {money(p.net_talent_payment, p.currency)}
+                </div>
+              </div>
+
+              <div className="col-span-2 text-right">
+                <StatusPill status={p.status} accent={paymentAccent(p.status)} />
+                <div className="mt-1 space-y-0.5 font-mono text-[10px] text-muted-foreground/70">
+                  {p.client_payment_date && (
+                    <div>Client {dateShort(p.client_payment_date)}</div>
+                  )}
+                  {p.talent_payment_date && (
+                    <div>Talent {dateShort(p.talent_payment_date)}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-2 flex flex-col items-end gap-1.5">
+                {canManage && p.status === "awaiting_client_payment" && (
+                  <button
+                    type="button"
+                    disabled={busyId === p.id}
+                    onClick={() => run(p.id, () => markClientPaid(p.id))}
+                    className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze disabled:opacity-60"
+                  >
+                    {busyId === p.id ? "Working…" : "Mark client paid"}
+                  </button>
+                )}
+                {canManage && p.status === "client_paid" && (
+                  <button
+                    type="button"
+                    disabled={busyId === p.id}
+                    onClick={() => run(p.id, () => markTalentPaid(p.id))}
+                    className="pressable inline-flex h-7 items-center gap-1 rounded-full bg-foreground px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-background disabled:opacity-60"
+                  >
+                    {busyId === p.id ? "Working…" : "Mark talent paid"}
+                  </button>
+                )}
+              </div>
+            </div>
           </li>
+        ))}
+        {payments.length === 0 && (
+          <EmptyRow>
+            No payments in this view — payments are raised from a booking&apos;s detail page.
+          </EmptyRow>
         )}
       </ul>
     </>

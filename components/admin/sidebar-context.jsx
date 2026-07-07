@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useSyncExternalStore } from "react";
 
 const SidebarContext = createContext({
   collapsed: false,
@@ -9,21 +9,28 @@ const SidebarContext = createContext({
   setMobileOpen: () => {},
 });
 
+// One-time external read, hydration-safe: the server snapshot is `false`,
+// the client snapshot reflects the persisted preference.
+const emptySubscribe = () => () => {};
+function useStoredCollapsed() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => localStorage.getItem("candor-sidebar-collapsed") === "1",
+    () => false
+  );
+}
+
 export function SidebarProvider({ children }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const stored = useStoredCollapsed();
+  const [override, setOverride] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("candor-sidebar-collapsed");
-    if (stored === "1") setCollapsed(true);
-  }, []);
+  const collapsed = override ?? stored;
 
   const toggle = () => {
-    setCollapsed((c) => {
-      const next = !c;
-      localStorage.setItem("candor-sidebar-collapsed", next ? "1" : "0");
-      return next;
-    });
+    const next = !collapsed;
+    localStorage.setItem("candor-sidebar-collapsed", next ? "1" : "0");
+    setOverride(next);
   };
 
   return (

@@ -1,142 +1,130 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, ChevronDown, Clock, AlertCircle } from "lucide-react";
+import { useState, useTransition } from "react";
+import {
+  AlertCircle,
+  Camera,
+  CalendarCheck,
+  CalendarClock,
+  Check,
+  ChevronDown,
+  Clock,
+  FileText,
+  Megaphone,
+  MessagesSquare,
+  Wallet,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { dateLong, relativeTime, statusLabel } from "@/lib/format";
+import {
+  markNotificationRead,
+  respondToNotification,
+} from "@/lib/actions/notifications";
 
-const ME_ID = "1";
-const NOW = new Date("2026-04-18T20:00:00");
-
-const ACTIONS = {
-  availability_check: [
-    { id: "Available", label: "Available", tone: "primary" },
-    { id: "Not available", label: "Not available", tone: "ghost" },
-  ],
-  booking_update: [
-    { id: "Accepted", label: "Accepted", tone: "primary" },
-    { id: "Query", label: "Query", tone: "ghost", prompt: true },
-  ],
-  portfolio_request: [{ id: "Confirmed", label: "Confirmed", tone: "primary" }],
-  pre_job_brief: [{ id: "Acknowledged", label: "Acknowledged", tone: "primary" }],
-  payment_update: [],
-  general: [],
-  announcement: [],
+const TYPE_META = {
+  availability_check: { label: "Availability check", icon: CalendarClock },
+  booking_update: { label: "Booking update", icon: CalendarCheck },
+  portfolio_request: { label: "Portfolio request", icon: Camera },
+  payment_update: { label: "Payment update", icon: Wallet },
+  pre_job_brief: { label: "Pre-job brief", icon: FileText },
+  general: { label: "General", icon: MessagesSquare },
+  announcement: { label: "Announcement", icon: Megaphone },
 };
 
-const TYPE_LABEL = {
-  availability_check: "Availability check",
-  booking_update: "Booking update",
-  portfolio_request: "Portfolio request",
-  pre_job_brief: "Pre-job brief",
-  payment_update: "Payment update",
-  general: "General",
-  announcement: "Announcement",
-};
-
-function relativeTime(iso) {
-  const then = new Date(iso);
-  const diff = NOW - then;
-  const minutes = Math.round(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return then.toLocaleDateString("en", { month: "short", day: "numeric" });
+function typeMeta(type) {
+  return TYPE_META[type] ?? { label: statusLabel(type), icon: MessagesSquare };
 }
 
-function statusFor(msg, myResponse) {
-  const hasActions = (ACTIONS[msg.type] || []).length > 0;
-  if (!hasActions) return { kind: "info", label: "Read" };
-  if (myResponse?.response === "Query") {
-    return { kind: "awaiting", label: "Awaiting reply" };
+// Which buttons an actionable message gets. availability_check → Accept /
+// Decline; everything else that requires a response → Confirm / Query.
+function actionsFor(type) {
+  if (type === "availability_check") {
+    return [
+      { response: "accepted", label: "Accept", tone: "primary" },
+      { response: "declined", label: "Decline", tone: "ghost" },
+    ];
   }
-  if (myResponse) return { kind: "read", label: "Responded" };
-  return { kind: "action", label: "Action needed" };
+  return [
+    { response: "confirmed", label: "Confirm", tone: "primary" },
+    { response: "queried", label: "Query", tone: "ghost", prompt: true },
+  ];
 }
 
-export function TalentInbox({ messages, myId = ME_ID }) {
-  const enriched = useMemo(
-    () =>
-      messages
-        .map((m) => ({
-          ...m,
-          myResponse: m.responses?.find((r) => r.talentId === myId) || null,
-        }))
-        .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt)),
-    [messages, myId]
-  );
+const RESPONSE_LABEL = {
+  accepted: "Accepted",
+  declined: "Declined",
+  confirmed: "Confirmed",
+  queried: "Query sent",
+};
 
+export function NotificationInbox({ notifications }) {
   const [filter, setFilter] = useState("all");
-  const [openId, setOpenId] = useState(() =>
-    enriched.find((m) => statusFor(m, m.myResponse).kind === "action")?.id || null
-  );
-  const [localResponses, setLocalResponses] = useState({});
-  const [queryDraft, setQueryDraft] = useState({});
+  const [openId, setOpenId] = useState(null);
+  // Local overlays so the UI answers instantly; the server revalidation
+  // catches up in the background.
+  const [overrides, setOverrides] = useState({});
 
-  const visible = enriched.filter((m) => {
-    if (filter === "all") return true;
-    const status = localResponses[m.id]
-      ? { kind: localResponses[m.id].response === "Query" ? "awaiting" : "read" }
-      : statusFor(m, m.myResponse);
-    if (filter === "action") return status.kind === "action";
-    if (filter === "awaiting") return status.kind === "awaiting";
-    if (filter === "read") return status.kind === "read" || status.kind === "info";
+  const items = notifications.map((n) => ({
+    ...n,
+    ...(overrides[n.id] ?? {}),
+  }));
+
+  const needsAction = (n) => n.requiresResponse && n.responseStatus === "pending";
+
+  const visible = items.filter((n) => {
+    if (filter === "action") return needsAction(n);
+    if (filter === "unread") return !n.isRead;
     return true;
   });
 
-  const countsFor = (kind) =>
-    enriched.filter((m) => {
-      const local = localResponses[m.id];
-      const s = local
-        ? { kind: local.response === "Query" ? "awaiting" : "read" }
-        : statusFor(m, m.myResponse);
-      if (kind === "read") return s.kind === "read" || s.kind === "info";
-      return s.kind === kind;
-    }).length;
+  const counts = {
+    all: items.length,
+    action: items.filter(needsAction).length,
+    unread: items.filter((n) => !n.isRead).length,
+  };
 
-  const respond = (id, response, note) => {
-    setLocalResponses((prev) => ({
-      ...prev,
-      [id]: { response, note: note || null, at: new Date().toISOString() },
-    }));
-    setQueryDraft((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
+  const patch = (id, values) =>
+    setOverrides((prev) => ({ ...prev, [id]: { ...(prev[id] ?? {}), ...values } }));
+
+  const handleOpen = (n) => {
+    const opening = openId !== n.id;
+    setOpenId(opening ? n.id : null);
+    if (opening && !n.isRead && !n.requiresResponse) {
+      patch(n.id, { isRead: true });
+      // Fire-and-forget; revalidation reconciles the badge counts.
+      markNotificationRead(n.id);
+    }
   };
 
   return (
     <div className="max-w-[920px]">
       <div className="flex items-center gap-1 pb-6">
         {[
-          { id: "all", label: "All", count: enriched.length },
-          { id: "action", label: "Action needed", count: countsFor("action") },
-          { id: "awaiting", label: "Awaiting reply", count: countsFor("awaiting") },
-          { id: "read", label: "Read", count: countsFor("read") },
+          { id: "all", label: "All" },
+          { id: "action", label: "Action needed" },
+          { id: "unread", label: "Unread" },
         ].map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setFilter(t.id)}
             className={cn(
-              "h-7 rounded-full px-3 text-[12px] font-medium transition-colors",
+              "pressable h-7 rounded-full px-3 text-[12px] font-medium transition-colors",
               filter === t.id
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
             )}
           >
             {t.label}
-            {t.count > 0 && (
+            {counts[t.id] > 0 && (
               <span
                 className={cn(
                   "ml-1.5 text-[10.5px]",
                   filter === t.id ? "text-background/60" : "text-muted-foreground/60"
                 )}
               >
-                {t.count}
+                {counts[t.id]}
               </span>
             )}
           </button>
@@ -144,161 +132,25 @@ export function TalentInbox({ messages, myId = ME_ID }) {
       </div>
 
       <ul className="border-t border-border">
-        {visible.map((m) => {
-          const local = localResponses[m.id];
-          const effectiveResponse = local || m.myResponse;
-          const status = local
-            ? local.response === "Query"
-              ? { kind: "awaiting", label: "Awaiting reply" }
-              : { kind: "read", label: "Responded" }
-            : statusFor(m, m.myResponse);
-          const actions = ACTIONS[m.type] || [];
-          const isOpen = openId === m.id;
-          const isUnread = status.kind === "action" || (status.kind === "info" && !m.myResponse);
-
-          return (
-            <li
-              key={m.id}
-              className="group border-b border-border"
-              data-unread={isUnread}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenId(isOpen ? null : m.id)}
-                className={cn(
-                  "relative flex w-full items-start gap-4 px-1 py-5 text-left outline-hidden",
-                  "hover:bg-surface-muted/40"
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute left-[-10px] top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full transition-[opacity,transform] duration-200",
-                    status.kind === "action"
-                      ? "bg-destructive opacity-100"
-                      : status.kind === "awaiting"
-                        ? "bg-warning opacity-100"
-                        : "bg-transparent"
-                  )}
-                />
-
-                <div className="w-20 shrink-0 pt-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-muted-foreground/70">
-                  {TYPE_LABEL[m.type]}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "truncate text-[14px] tracking-[-0.005em]",
-                        isUnread
-                          ? "font-semibold text-foreground"
-                          : "font-medium text-foreground/80"
-                      )}
-                    >
-                      {m.title}
-                    </span>
-                    {status.kind === "action" && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-destructive">
-                        <AlertCircle className="h-2.5 w-2.5" />
-                        Action
-                      </span>
-                    )}
-                    {status.kind === "awaiting" && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-warning">
-                        <Clock className="h-2.5 w-2.5" />
-                        Awaiting
-                      </span>
-                    )}
-                  </div>
-                  <p
-                    className={cn(
-                      "mt-1 line-clamp-1 text-[12.5px] transition-colors",
-                      isOpen ? "text-muted-foreground/60" : "text-muted-foreground"
-                    )}
-                  >
-                    {m.body}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-2 pt-0.5">
-                  <span className="text-[11px] tabular-nums text-muted-foreground">
-                    {relativeTime(m.sentAt)}
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      "h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200",
-                      isOpen && "rotate-180"
-                    )}
-                  />
-                </div>
-              </button>
-
-              {isOpen && (
-                <div className="slide-up-in overflow-hidden pl-[104px] pr-2 pb-6">
-                  <div className="rounded-xl border border-border bg-surface-muted/40 p-5">
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <span className="font-medium text-foreground">From Candor</span>
-                      <span className="text-muted-foreground/40">·</span>
-                      <span>{m.sentBy}</span>
-                      <span className="text-muted-foreground/40">·</span>
-                      <span>
-                        {new Date(m.sentAt).toLocaleString("en", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-
-                    <p className="mt-3 font-serif text-[16px] leading-[1.55] text-foreground">
-                      {m.body}
-                    </p>
-
-                    <div className="mt-5">
-                      {actions.length === 0 ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-background px-3 py-1.5 text-[11.5px] text-muted-foreground ring-1 ring-border">
-                          <Check className="h-3 w-3" />
-                          No action required
-                        </div>
-                      ) : effectiveResponse ? (
-                        <div className="flex items-center gap-3">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-[11.5px] font-medium text-background">
-                            <Check className="h-3 w-3" />
-                            You responded: {effectiveResponse.response}
-                          </span>
-                          {effectiveResponse.note && (
-                            <span className="text-[11.5px] italic text-muted-foreground">
-                              "{effectiveResponse.note}"
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <ActionButtons
-                          actions={actions}
-                          onRespond={(id, note) => respond(m.id, id, note)}
-                          queryDraft={queryDraft[m.id] || ""}
-                          setQueryDraft={(v) =>
-                            setQueryDraft((prev) => ({ ...prev, [m.id]: v }))
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        })}
+        {visible.map((n) => (
+          <InboxRow
+            key={n.id}
+            notification={n}
+            open={openId === n.id}
+            onToggle={() => handleOpen(n)}
+            onResponded={(values) => patch(n.id, values)}
+          />
+        ))}
 
         {visible.length === 0 && (
           <li className="py-16 text-center">
             <p className="font-serif text-[18px] italic text-muted-foreground">
-              Nothing here.
+              {items.length === 0 ? "No messages yet." : "Nothing here."}
             </p>
             <p className="mt-1 text-[12px] text-muted-foreground/70">
-              Try another filter — or enjoy the quiet.
+              {items.length === 0
+                ? "Candor will reach out here about castings, bookings and payments."
+                : "Try another filter — or enjoy the quiet."}
             </p>
           </li>
         )}
@@ -307,44 +159,200 @@ export function TalentInbox({ messages, myId = ME_ID }) {
   );
 }
 
-function ActionButtons({ actions, onRespond, queryDraft, setQueryDraft }) {
+function InboxRow({ notification: n, open, onToggle, onResponded }) {
+  const meta = typeMeta(n.type);
+  const Icon = meta.icon;
+  const actionNeeded = n.requiresResponse && n.responseStatus === "pending";
+  const responded = n.requiresResponse && n.responseStatus !== "pending";
+
+  return (
+    <li className="border-b border-border">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="relative flex w-full items-start gap-4 px-1 py-5 text-left outline-hidden hover:bg-surface-muted/40"
+      >
+        <span
+          aria-hidden
+          className={cn(
+            "absolute left-[-10px] top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full",
+            actionNeeded ? "bg-warning opacity-100" : "bg-transparent"
+          )}
+        />
+
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-surface-muted text-muted-foreground">
+          <Icon className="h-4 w-4" />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            {!n.isRead && (
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-bronze"
+              />
+            )}
+            <span
+              className={cn(
+                "truncate text-[14px] tracking-[-0.005em]",
+                n.isRead
+                  ? "font-medium text-foreground/80"
+                  : "font-semibold text-foreground"
+              )}
+            >
+              {n.title}
+            </span>
+            {actionNeeded && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-warning">
+                <Clock className="h-2.5 w-2.5" />
+                Awaiting you
+              </span>
+            )}
+            {responded && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-success">
+                <Check className="h-2.5 w-2.5" />
+                {RESPONSE_LABEL[n.responseStatus] ?? statusLabel(n.responseStatus)}
+              </span>
+            )}
+          </div>
+          <div className="mt-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-muted-foreground/70">
+            {meta.label}
+            {n.isBroadcast ? " · To the roster" : ""}
+          </div>
+          <p
+            className={cn(
+              "mt-1 line-clamp-1 text-[12.5px]",
+              open ? "text-muted-foreground/60" : "text-muted-foreground"
+            )}
+          >
+            {n.body}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 pt-0.5">
+          <span className="text-[11px] tabular-nums text-muted-foreground">
+            {relativeTime(n.createdAt)}
+          </span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200",
+              open && "rotate-180"
+            )}
+          />
+        </div>
+      </button>
+
+      {open && (
+        <div className="slide-up-in overflow-hidden pb-6 pl-[52px] pr-2">
+          <div className="rounded-xl border border-border bg-surface-muted/40 p-5">
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="font-medium text-foreground">From Candor</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span>{dateLong(n.createdAt)}</span>
+            </div>
+
+            <p className="mt-3 whitespace-pre-line font-serif text-[16px] leading-[1.55] text-foreground">
+              {n.body}
+            </p>
+
+            <div className="mt-5">
+              {!n.requiresResponse ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-background px-3 py-1.5 text-[11.5px] text-muted-foreground ring-1 ring-border">
+                  <Check className="h-3 w-3" />
+                  No action required
+                </div>
+              ) : responded ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-[11.5px] font-medium text-background">
+                    <Check className="h-3 w-3" />
+                    You responded — {RESPONSE_LABEL[n.responseStatus] ?? statusLabel(n.responseStatus)}
+                  </span>
+                  {n.responseText && (
+                    <span className="text-[11.5px] italic text-muted-foreground">
+                      &ldquo;{n.responseText}&rdquo;
+                    </span>
+                  )}
+                  {n.respondedAt && (
+                    <span className="text-[10.5px] text-muted-foreground/60">
+                      {relativeTime(n.respondedAt)}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <ResponseActions notification={n} onResponded={onResponded} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}
+
+function ResponseActions({ notification: n, onResponded }) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState(null);
   const [showQuery, setShowQuery] = useState(false);
+  const [queryText, setQueryText] = useState("");
+
+  const submit = (response, text) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await respondToNotification(n.id, response, text);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      onResponded({
+        isRead: true,
+        responseStatus: response,
+        responseText: text ?? null,
+        respondedAt: new Date().toISOString(),
+      });
+    });
+  };
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        {actions.map((a) => (
+        {actionsFor(n.type).map((a) => (
           <button
-            key={a.id}
+            key={a.response}
             type="button"
+            disabled={pending}
             onClick={() => {
               if (a.prompt) {
                 setShowQuery((v) => !v);
               } else {
-                onRespond(a.id);
+                submit(a.response);
               }
             }}
             className={cn(
-              "inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[12.5px] font-medium transition-transform duration-150 hover:-translate-y-[1px]",
+              "pressable inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[12.5px] font-medium transition-colors disabled:opacity-50",
               a.tone === "primary"
-                ? "bg-foreground text-background"
+                ? "bg-foreground text-background hover:bg-foreground/90"
                 : "border border-border bg-background text-foreground hover:border-border-strong"
             )}
           >
-            {a.label}
+            {pending ? "Saving…" : a.label}
           </button>
         ))}
       </div>
 
       {showQuery && (
         <div className="slide-up-in space-y-2 rounded-lg border border-border bg-background p-3">
-          <label className="block text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
+          <label
+            htmlFor={`query-${n.id}`}
+            className="block text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70"
+          >
             Your query
           </label>
           <textarea
+            id={`query-${n.id}`}
             autoFocus
-            value={queryDraft}
-            onChange={(e) => setQueryDraft(e.target.value)}
+            value={queryText}
+            onChange={(e) => setQueryText(e.target.value)}
             rows={2}
             placeholder="What's unclear? Your booker will reply."
             className="w-full resize-none bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
@@ -354,22 +362,30 @@ function ActionButtons({ actions, onRespond, queryDraft, setQueryDraft }) {
               type="button"
               onClick={() => {
                 setShowQuery(false);
-                setQueryDraft("");
+                setQueryText("");
               }}
-              className="text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
             >
+              <X className="h-3 w-3" />
               Cancel
             </button>
             <button
               type="button"
-              disabled={!queryDraft.trim()}
-              onClick={() => onRespond("Query", queryDraft.trim())}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[12px] font-medium text-background transition-opacity disabled:opacity-30"
+              disabled={pending || !queryText.trim()}
+              onClick={() => submit("queried", queryText.trim())}
+              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[12px] font-medium text-background transition-opacity disabled:opacity-30"
             >
-              Send query
+              {pending ? "Sending…" : "Send query"}
             </button>
           </div>
         </div>
+      )}
+
+      {error && (
+        <p className="inline-flex items-center gap-1.5 text-[12px] text-destructive">
+          <AlertCircle className="h-3.5 w-3.5" />
+          {error}
+        </p>
       )}
     </div>
   );

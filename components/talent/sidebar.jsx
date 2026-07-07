@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import {
   Home,
   CalendarCheck,
@@ -14,12 +13,10 @@ import {
   Trophy,
   Camera,
   Users,
-  Phone,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MODES, useRail } from "./rail-context";
-import { AgentCalloutModal } from "./agent-callout-modal";
-import { useMe, useAgent } from "@/lib/store";
 
 const DASHBOARD_NAV = [
   {
@@ -31,7 +28,7 @@ const DASHBOARD_NAV = [
         title: "Communications",
         href: "/talent/communications",
         icon: MessagesSquare,
-        badge: 2,
+        unreadBadge: true,
       },
       { title: "Documents", href: "/talent/documents", icon: FileText },
       { title: "Calendar", href: "/talent/calendar", icon: CalendarDays },
@@ -41,7 +38,7 @@ const DASHBOARD_NAV = [
     label: "Community",
     muted: true,
     items: [
-      { title: "Casting board", href: "/talent/castings", icon: Clapperboard, badge: 4 },
+      { title: "Casting board", href: "/talent/castings", icon: Clapperboard },
       { title: "Milestones", href: "/talent/milestones", icon: Trophy },
     ],
   },
@@ -75,12 +72,9 @@ const SPEC = {
   },
 };
 
-export function TalentSidebar() {
+export function TalentSidebar({ unread = 0 }) {
   const pathname = usePathname();
   const { mode } = useRail();
-  const [agentOpen, setAgentOpen] = useState(false);
-  const me = useMe();
-  const agent = useAgent(me);
   const spec = SPEC[mode] || SPEC[MODES.DASHBOARD];
 
   const isActive = (item) =>
@@ -123,6 +117,7 @@ export function TalentSidebar() {
             <ul className="flex flex-col gap-0.5">
               {section.items.map((item) => {
                 const active = isActive(item);
+                const badge = item.unreadBadge && unread > 0 ? unread : null;
                 return (
                   <li key={item.href}>
                     <Link
@@ -148,12 +143,12 @@ export function TalentSidebar() {
                         )}
                       />
                       <span className="flex-1 truncate">{item.title}</span>
-                      {item.badge ? (
+                      {badge ? (
                         <span
                           data-slot="numeric"
-                          className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-medium text-primary"
+                          className="flex h-4 min-w-4 items-center justify-center rounded-full bg-bronze/10 px-1 text-[10px] font-medium text-bronze"
                         >
-                          {item.badge}
+                          {badge}
                         </span>
                       ) : null}
                     </Link>
@@ -165,35 +160,22 @@ export function TalentSidebar() {
         ))}
       </nav>
 
-      {agent && (
-        <button
-          type="button"
-          onClick={() => setAgentOpen(true)}
-          className="group mx-4 mb-4 flex items-center gap-3 rounded-xl border border-border bg-surface-muted/60 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-muted"
-        >
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-background"
-            style={{ backgroundColor: agent.accent || "#111" }}
-          >
-            {agent.avatar}
+      <a
+        href="mailto:bookings@candormanagement.com"
+        className="group mx-4 mb-4 flex items-center gap-3 rounded-xl border border-border bg-surface-muted/60 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-muted"
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+          <Mail className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
+            Your booking team
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-              Your agent
-            </div>
-            <div className="truncate font-serif text-[14px] italic leading-tight text-foreground">
-              Reach out to {agent.short}
-            </div>
+          <div className="truncate font-serif text-[14px] italic leading-tight text-foreground">
+            bookings@candor
           </div>
-          <Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-        </button>
-      )}
-
-      <AgentCalloutModal
-        open={agentOpen}
-        onClose={() => setAgentOpen(false)}
-        agent={agent}
-      />
+        </div>
+      </a>
     </aside>
   );
 }

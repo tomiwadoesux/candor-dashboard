@@ -109,7 +109,7 @@ export function TalentAiPopup() {
               Ask Candor
             </div>
             <div className="text-[11px] text-muted-foreground">
-              Your AI booking assistant · reads your data, doesn't share it
+              Your AI booking assistant &middot; reads your data, doesn&apos;t share it
             </div>
           </div>
           <button
@@ -180,7 +180,7 @@ export function TalentAiPopup() {
                   className="group inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11.5px] text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface-muted hover:text-foreground"
                 >
                   {s}
-                  <ArrowUpRight className="h-3 w-3 translate-x-0 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                  <ArrowUpRight className="h-3 w-3 translate-x-0 opacity-0 transition-[transform,opacity] duration-200 ease-out group-hover:translate-x-0.5 group-hover:opacity-100" />
                 </button>
               ))}
             </div>

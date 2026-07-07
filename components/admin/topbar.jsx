@@ -1,17 +1,28 @@
 "use client";
 
-import { Bell, HelpCircle, Plus } from "lucide-react";
+import { useTransition } from "react";
+import Link from "next/link";
+import { HelpCircle, Loader2, LogOut, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { NotificationsPopover } from "@/components/shared/notifications-popover";
+import { statusLabel } from "@/lib/format";
+import { logout } from "@/lib/actions/auth";
 
-export function AdminTopbar({ crumbs = [] }) {
+export function AdminTopbar({ profile, crumbs = [] }) {
+  const [signingOut, startSignOut] = useTransition();
+  const firstName = profile?.full_name?.split(" ")[0] || "there";
+
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/80 px-6 backdrop-blur-md">
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <div className="flex h-7 items-center gap-2 pl-1">
           <span className="font-serif text-[14px] italic text-foreground">
-            Welcome, Adaora
+            Welcome, {firstName}
           </span>
+          {profile?.role && (
+            <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">
+              {statusLabel(profile.role)}
+            </span>
+          )}
         </div>
 
         {crumbs.length > 0 && (
@@ -39,29 +50,27 @@ export function AdminTopbar({ crumbs = [] }) {
         >
           <HelpCircle className="h-4 w-4" />
         </button>
-        <NotificationsPopover
-          trigger={({ unread, onClick, open }) => (
-            <button
-              type="button"
-              onClick={onClick}
-              className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
-              aria-label="Notifications"
-              aria-expanded={open}
-            >
-              <Bell className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-              )}
-            </button>
-          )}
-        />
         <button
           type="button"
-          className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[12.5px] font-medium text-primary-foreground shadow-[var(--shadow-sink)] transition-colors hover:bg-primary/92"
+          onClick={() => startSignOut(() => logout())}
+          disabled={signingOut}
+          className="pressable flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground disabled:opacity-60"
+          aria-label="Log out"
+          title="Log out"
+        >
+          {signingOut ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="h-4 w-4" />
+          )}
+        </button>
+        <Link
+          href="/admin/bookings/new"
+          className="pressable ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[12.5px] font-medium text-primary-foreground shadow-[var(--shadow-sink)] transition-colors hover:bg-primary/92"
         >
           <Plus className="h-3.5 w-3.5" />
-          New
-        </button>
+          New booking
+        </Link>
       </div>
     </header>
   );
