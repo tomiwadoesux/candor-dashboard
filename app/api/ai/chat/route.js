@@ -16,12 +16,12 @@ export async function POST(request) {
     return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, role")
-    .eq("id", user.id)
+  const { data: talent } = await supabase
+    .from("talent_profiles")
+    .select("id, first_name")
+    .eq("user_id", user.id)
     .single();
-  if (!profile || profile.role !== "talent") {
+  if (!talent) {
     return NextResponse.json(
       { error: "Ask Candor is available to talent accounts" },
       { status: 403 }
@@ -41,28 +41,31 @@ export async function POST(request) {
     });
   }
 
-  // Ground the model in this talent's actual data.
+  // Ground the model in this talent's actual data (RLS scopes every query).
   const [bookings, payments, castings] = await Promise.all([
     supabase
       .from("bookings")
       .select(
-        "project_name, status, start_date, end_date, fee_gross, currency, clients(company_name)"
+        "project_title, status, booking_date, booking_end_date, call_time, location_city, talent_fee, fee_currency, clients(company_name)"
       )
-      .order("start_date", { ascending: false })
+      .order("booking_date", { ascending: false })
       .limit(12),
     supabase
       .from("payments")
-      .select("amount_gross, amount_net, currency, status, invoice_number, paid_date")
+      .select(
+        "gross_fee, commission_amount, net_talent_payment, currency, status, invoice_number, talent_payment_date"
+      )
       .order("created_at", { ascending: false })
       .limit(12),
     supabase
       .from("open_castings_public")
       .select("title, category, location, deadline")
+      .eq("status", "open")
       .limit(8),
   ]);
 
   const context = {
-    talent_name: profile.full_name,
+    talent_name: talent.first_name,
     today: new Date().toISOString().slice(0, 10),
     bookings: bookings.data ?? [],
     payments: payments.data ?? [],
@@ -74,7 +77,7 @@ export async function POST(request) {
   const { data: convo } = await supabase
     .from("ai_conversations")
     .select("id, messages")
-    .eq("talent_user_id", user.id)
+    .eq("talent_id", talent.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -137,7 +140,7 @@ export async function POST(request) {
   } else {
     await supabase
       .from("ai_conversations")
-      .insert({ talent_user_id: user.id, messages: newMessages });
+      .insert({ talent_id: talent.id, messages: newMessages });
   }
 
   return NextResponse.json({ reply });

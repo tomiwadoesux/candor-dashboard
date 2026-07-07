@@ -15,7 +15,7 @@ export async function GET(request) {
 
   let query = supabase.from("public_roster").select("*");
   if (category) query = query.eq("category", category);
-  if (location) query = query.eq("location", location);
+  if (location) query = query.eq("primary_location", location);
 
   const { data, error } = await query;
   if (error) {
