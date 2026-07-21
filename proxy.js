@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password", "/package"];
+const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password", "/package", "/preview"];
 
 // Session refresh + coarse route gating. Fine-grained role checks live in the
 // layouts (requireRole) and inside every server action (assertRole) — proxy
