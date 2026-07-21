@@ -126,10 +126,12 @@ export default async function AvailabilityPage({ searchParams }) {
 
   const rows = await checkAvailability({ from, to, category: category || undefined });
   const available = rows.filter((r) => r.state === "available");
+  const away = rows.filter((r) => r.state === "away");
   const pencilled = rows.filter((r) => r.state === "pencilled");
   const booked = rows.filter((r) => r.state === "booked");
 
-  const conflictAccent = (status) => (status === "confirmed" ? "destructive" : "warning");
+  const conflictAccent = (status) =>
+    status === "confirmed" ? "destructive" : status === "away" ? "muted" : "warning";
 
   return (
     <div>
@@ -183,13 +185,14 @@ export default async function AvailabilityPage({ searchParams }) {
         </button>
       </form>
 
-      <div className="mt-10 grid grid-cols-2 gap-6 border-y border-border/60 py-5 sm:grid-cols-3 lg:max-w-2xl">
+      <div className="mt-10 grid grid-cols-2 gap-6 border-y border-border/60 py-5 sm:grid-cols-4 lg:max-w-3xl">
         <Stat
           label="Available"
           value={available.length}
           sub={`of ${rows.length} active`}
           accent="success"
         />
+        <Stat label="Away" value={away.length} />
         <Stat label="Pencilled" value={pencilled.length} accent="warning" />
         <Stat label="Booked" value={booked.length} accent="destructive" />
       </div>
@@ -207,6 +210,14 @@ export default async function AvailabilityPage({ searchParams }) {
             dot="bg-success"
             talent={available}
             empty="No one is fully free in this window."
+            conflictAccent={conflictAccent}
+          />
+          <Group
+            eyebrow="Away · talent-declared"
+            accent="text-muted-foreground"
+            dot="bg-muted-foreground/50"
+            talent={away}
+            empty="No one has blocked out dates in this window."
             conflictAccent={conflictAccent}
           />
           <Group

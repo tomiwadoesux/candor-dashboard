@@ -42,6 +42,10 @@ action cards, admin split-pane messenger with per-talent threads.
    with user metadata `{"full_name": "Your Name", "role": "ceo"}` — the
    signup trigger creates the matching profile. Roles: `talent`, `booker`,
    `md`, `ceo`.
+   The connected demo project already has logins for every active seeded
+   profile (e.g. `ileri@candoragency.com` CEO, `aliyu@candoragency.com`
+   booker, `velvet@candoragency.com` talent) — shared demo password, ask
+   the CEO.
 5. `npm run dev`
 
 ## Architecture

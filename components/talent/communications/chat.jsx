@@ -21,6 +21,10 @@ import {
   markNotificationRead,
   respondToNotification,
 } from "@/lib/actions/notifications";
+import {
+  markMessagesReadAsTalent,
+  sendMessageAsTalent,
+} from "@/lib/actions/messages";
 
 const TYPE_META = {
   availability_check: { label: "Availability check", icon: CalendarClock },
@@ -37,7 +41,7 @@ function typeMeta(type) {
 }
 
 // Which buttons an actionable message gets. availability_check → Accept /
-// Decline; everything else that requires a response → Confirm / Query.
+// Decline; everything else that requires a response → Confirm.
 function actionsFor(type) {
   if (type === "availability_check") {
     return [
@@ -68,11 +72,12 @@ function CandorAvatar({ className }) {
   );
 }
 
-export function ChatThread({ notifications }) {
+export function ChatThread({ notifications, messages = [] }) {
   const [filter, setFilter] = useState("all");
   // Local overlays so the UI answers instantly; the server revalidation
   // catches up in the background.
   const [overrides, setOverrides] = useState({});
+  const [sent, setSent] = useState([]);
   const [replyTo, setReplyTo] = useState(null);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState(null);
@@ -91,15 +96,24 @@ export function ChatThread({ notifications }) {
     if (markedRef.current) return;
     markedRef.current = true;
     const unread = notifications.filter((n) => !n.isRead && !n.requiresResponse);
-    if (unread.length === 0) return;
-    Promise.allSettled(unread.map((n) => markNotificationRead(n.id)));
-  }, [notifications]);
+    const jobs = unread.map((n) => markNotificationRead(n.id));
+    if (messages.some((m) => !m.sender_is_talent && !m.is_read)) {
+      jobs.push(markMessagesReadAsTalent());
+    }
+    if (jobs.length) Promise.allSettled(jobs);
+  }, [notifications, messages]);
 
   const needsReply = (n) => n.requiresResponse && n.responseStatus === "pending";
   const openRequests = items.filter(needsReply);
 
-  // Build the timeline: incoming messages plus the talent's own responses,
-  // each at its real timestamp.
+  // Merge server chat messages with optimistic sends not yet revalidated in.
+  const chat = useMemo(() => {
+    const known = new Set(messages.map((m) => m.id));
+    return [...messages, ...sent.filter((m) => !known.has(m.id))];
+  }, [messages, sent]);
+
+  // Build the timeline: notifications, the talent's structured responses,
+  // and free-form chat — each at its real timestamp.
   const timeline = useMemo(() => {
     const rows = [];
     for (const n of items) {
@@ -111,6 +125,16 @@ export function ChatThread({ notifications }) {
           at: n.respondedAt ?? n.createdAt,
           n,
           key: `out-${n.id}`,
+        });
+      }
+    }
+    if (filter !== "action") {
+      for (const m of chat) {
+        rows.push({
+          kind: m.sender_is_talent ? "chat-out" : "chat-in",
+          at: m.created_at,
+          m,
+          key: `msg-${m.id}`,
         });
       }
     }
@@ -127,7 +151,7 @@ export function ChatThread({ notifications }) {
       grouped.push(row);
     }
     return grouped;
-  }, [items, filter]);
+  }, [items, chat, filter]);
 
   // Keep the newest message in view, the way a conversation should open.
   const count = timeline.length;
@@ -162,13 +186,29 @@ export function ChatThread({ notifications }) {
 
   const sendDraft = () => {
     const text = draft.trim();
-    const target = replyTo ?? (openRequests.length === 1 ? openRequests[0] : null);
-    if (!text || !target) return;
-    respond(target, "queried", text);
+    if (!text) return;
+    if (replyTo) {
+      respond(replyTo, "queried", text);
+      return;
+    }
+    setError(null);
+    const temp = {
+      id: `temp-${Math.random().toString(36).slice(2)}`,
+      sender_is_talent: true,
+      body: text,
+      created_at: new Date().toISOString(),
+    };
+    setSent((prev) => [...prev, temp]);
+    setDraft("");
+    startTransition(async () => {
+      const result = await sendMessageAsTalent(text);
+      if (result?.error) {
+        setSent((prev) => prev.filter((m) => m.id !== temp.id));
+        setDraft(text);
+        setError(result.error);
+      }
+    });
   };
-
-  const composerTarget = replyTo ?? (openRequests.length === 1 ? openRequests[0] : null);
-  const composerDisabled = openRequests.length === 0;
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[760px] flex-1 flex-col">
@@ -233,7 +273,7 @@ export function ChatThread({ notifications }) {
             <p className="mt-1 max-w-[36ch] text-[12.5px] text-muted-foreground">
               {filter === "action"
                 ? "You're all caught up."
-                : "Castings, bookings and payment updates from your team land here."}
+                : "Say hello — your booking team reads this inbox."}
             </p>
           </div>
         )}
@@ -250,13 +290,44 @@ export function ChatThread({ notifications }) {
               );
             }
 
+            if (row.kind === "chat-out") {
+              return (
+                <li key={row.key} className="bubble-enter flex justify-end">
+                  <div className="flex max-w-[min(88%,30rem)] flex-col items-end gap-1">
+                    <div className="bubble bubble-out">
+                      <span className="whitespace-pre-line">{row.m.body}</span>
+                    </div>
+                    <span className="px-1 font-mono text-[10.5px] text-muted-foreground/60">
+                      {timeShort(row.at)}
+                    </span>
+                  </div>
+                </li>
+              );
+            }
+
+            if (row.kind === "chat-in") {
+              const prev = timeline[i - 1];
+              const clusterStart = !prev || prev.kind !== "chat-in";
+              return (
+                <li key={row.key} className="bubble-enter flex items-end gap-2">
+                  {clusterStart ? <CandorAvatar /> : <span className="w-6 shrink-0" />}
+                  <div className="flex max-w-[min(88%,30rem)] flex-col gap-1">
+                    <div className="bubble bubble-in">
+                      <span className="whitespace-pre-line">{row.m.body}</span>
+                    </div>
+                    <span className="px-1 font-mono text-[10.5px] text-muted-foreground/60">
+                      {timeShort(row.at)}
+                    </span>
+                  </div>
+                </li>
+              );
+            }
+
             const prev = timeline[i - 1];
             const clusterStart = !prev || prev.kind !== row.kind;
 
             if (row.kind === "out") {
-              return (
-                <OutgoingBubble key={row.key} row={row} />
-              );
+              return <OutgoingBubble key={row.key} row={row} />;
             }
 
             return (
@@ -285,22 +356,20 @@ export function ChatThread({ notifications }) {
           </p>
         )}
 
-        {composerTarget && (
+        {replyTo && (
           <div className="slide-up-in mb-2 flex items-center gap-2 text-[12px] text-muted-foreground">
             <span className="h-3 w-[2px] rounded-full bg-brand" />
             <span className="min-w-0 truncate">
-              Replying to <span className="font-medium text-foreground">{composerTarget.title}</span>
+              Replying to <span className="font-medium text-foreground">{replyTo.title}</span>
             </span>
-            {replyTo && (
-              <button
-                type="button"
-                onClick={() => setReplyTo(null)}
-                aria-label="Cancel reply"
-                className="text-muted-foreground/60 transition-colors hover:text-foreground"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setReplyTo(null)}
+              aria-label="Cancel reply"
+              className="text-muted-foreground/60 transition-colors hover:text-foreground"
+            >
+              <X className="h-3 w-3" />
+            </button>
           </div>
         )}
 
@@ -309,16 +378,12 @@ export function ChatThread({ notifications }) {
             e.preventDefault();
             sendDraft();
           }}
-          className={cn(
-            "flex items-end gap-2 rounded-2xl border border-input bg-surface px-3 py-2 transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)]",
-            !composerDisabled && "focus-within:border-brand/60 focus-within:ring-2 focus-within:ring-ring",
-            composerDisabled && "opacity-70"
-          )}
+          className="flex items-end gap-2 rounded-2xl border border-input bg-surface px-3 py-2 transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)] focus-within:border-brand/60 focus-within:ring-2 focus-within:ring-ring"
         >
           <textarea
             rows={1}
             value={draft}
-            disabled={composerDisabled || pending}
+            disabled={pending && Boolean(replyTo)}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -327,17 +392,13 @@ export function ChatThread({ notifications }) {
               }
             }}
             placeholder={
-              composerDisabled
-                ? "Replies attach to requests from your team — none open right now"
-                : composerTarget
-                  ? "Ask a question about this request…"
-                  : "Tap Reply on a request above to answer it"
+              replyTo ? "Ask a question about this request…" : "Message your team…"
             }
             className="max-h-32 min-h-[28px] flex-1 resize-none bg-transparent py-0.5 text-[13.5px] leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed"
           />
           <button
             type="submit"
-            disabled={composerDisabled || pending || !draft.trim() || !composerTarget}
+            disabled={!draft.trim() || (pending && Boolean(replyTo))}
             aria-label="Send"
             className="pressable flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground transition-[opacity,background-color] duration-150 hover:bg-brand-hover disabled:opacity-30"
           >
@@ -345,7 +406,7 @@ export function ChatThread({ notifications }) {
           </button>
         </form>
         <p className="mt-1.5 px-1 text-[11px] text-muted-foreground/60">
-          For anything else, email bookings@candormanagement.com
+          Your booking team replies here during office hours
         </p>
       </div>
     </div>

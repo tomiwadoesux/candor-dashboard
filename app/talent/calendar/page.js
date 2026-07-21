@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { myBookingsInRange } from "@/lib/queries/bookings";
+import { myUnavailability } from "@/lib/queries/availability";
 import { CalendarView } from "@/components/talent/calendar/view";
+import { OutDates } from "@/components/talent/calendar/out-dates";
 import { PageHeader } from "@/components/talent/kit";
 
 function pad(n) {
@@ -27,7 +29,13 @@ export default async function CalendarPage({ searchParams }) {
   const lastDay = new Date(year, month, 0).getDate();
   const monthStart = `${year}-${pad(month)}-01`;
   const monthEnd = `${year}-${pad(month)}-${pad(lastDay)}`;
-  const bookings = await myBookingsInRange(monthStart, monthEnd);
+  const [bookings, unavailability] = await Promise.all([
+    myBookingsInRange(monthStart, monthEnd),
+    myUnavailability(),
+  ]);
+  const monthAway = unavailability.filter(
+    (u) => u.start_date <= monthEnd && u.end_date >= monthStart
+  );
 
   const prev = month === 1 ? ym(year - 1, 12) : ym(year, month - 1);
   const next = month === 12 ? ym(year + 1, 1) : ym(year, month + 1);
@@ -79,6 +87,8 @@ export default async function CalendarPage({ searchParams }) {
         month={month}
         bookings={bookings}
         todayISO={todayISO}
+        unavailability={monthAway}
+        aside={<OutDates entries={unavailability} />}
       />
     </div>
   );

@@ -14,6 +14,10 @@ import { cn } from "@/lib/utils";
 import { statusLabel, timeShort, relativeTime } from "@/lib/format";
 import { dayKey, dayLabel } from "@/lib/chat-format";
 import { sendNotification } from "@/lib/actions/notifications";
+import {
+  markThreadReadAsAdmin,
+  sendMessageAsAdmin,
+} from "@/lib/actions/messages";
 import { ComposeForm } from "./compose-notification";
 
 const TYPES = [
@@ -64,7 +68,7 @@ function initials(name) {
 
 const BROADCAST_ID = "__broadcast__";
 
-export function AdminMessenger({ notifications, talent }) {
+export function AdminMessenger({ notifications, messages = [], talent }) {
   const [filter, setFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [composeOpen, setComposeOpen] = useState(false);
@@ -73,6 +77,7 @@ export function AdminMessenger({ notifications, talent }) {
 
   const conversations = useMemo(() => {
     const map = new Map();
+    const nameOf = new Map(talent.map((t) => [t.id, t.name]));
     const ensure = (id, name, isBroadcast = false) => {
       if (!map.has(id)) {
         map.set(id, {
@@ -82,6 +87,7 @@ export function AdminMessenger({ notifications, talent }) {
           items: [],
           awaiting: 0,
           escalated: 0,
+          unread: 0,
           lastAt: null,
           lastPreview: "",
         });
@@ -130,12 +136,36 @@ export function AdminMessenger({ notifications, talent }) {
       if (n.escalated) conv.escalated += 1;
     }
 
+    // Free-form chat merges into the same threads.
+    for (const m of messages) {
+      const conv = ensure(
+        m.talent_id,
+        m.talent
+          ? `${m.talent.first_name} ${m.talent.last_name}`
+          : nameOf.get(m.talent_id) ?? "Unknown"
+      );
+      conv.items.push({
+        kind: m.sender_is_talent ? "chat-in" : "chat-out",
+        at: m.created_at,
+        m,
+      });
+      if (new Date(m.created_at) > new Date(conv.lastAt ?? 0)) {
+        conv.lastAt = m.created_at;
+        conv.lastPreview = m.body;
+      }
+      if (m.sender_is_talent && !m.is_read) conv.unread += 1;
+    }
+
     for (const d of drafts) {
       const conv = map.get(d.convId);
       if (conv) {
-        conv.items.push({ kind: "out", at: d.at, n: d.n, draft: true });
+        conv.items.push(
+          d.m
+            ? { kind: "chat-out", at: d.at, m: d.m, draft: true }
+            : { kind: "out", at: d.at, n: d.n, draft: true }
+        );
         conv.lastAt = d.at;
-        conv.lastPreview = d.n.body;
+        conv.lastPreview = d.m ? d.m.body : d.n.body;
       }
     }
 
@@ -146,7 +176,7 @@ export function AdminMessenger({ notifications, talent }) {
     return [...map.values()].sort(
       (a, b) => new Date(b.lastAt ?? 0) - new Date(a.lastAt ?? 0)
     );
-  }, [notifications, drafts]);
+  }, [notifications, messages, talent, drafts]);
 
   const visible = conversations.filter((c) => {
     if (filter === "awaiting") return c.awaiting > 0;
@@ -248,6 +278,14 @@ export function AdminMessenger({ notifications, talent }) {
                           {c.awaiting}
                         </span>
                       )}
+                      {c.unread > 0 && (
+                        <span
+                          data-slot="numeric"
+                          className="flex h-[17px] min-w-[17px] shrink-0 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-brand-foreground"
+                        >
+                          {c.unread}
+                        </span>
+                      )}
                     </span>
                   </span>
                 </button>
@@ -301,12 +339,21 @@ function Thread({ conversation: c, onSent }) {
   const [error, setError] = useState(null);
   const [pending, startTransition] = useTransition();
   const scrollRef = useRef(null);
+  const readRef = useRef(new Set());
 
   const count = c.items.length;
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [count]);
+
+  // Opening a thread reads the talent's messages — once per conversation.
+  const unread = c.unread;
+  useEffect(() => {
+    if (c.isBroadcast || unread === 0 || readRef.current.has(c.id)) return;
+    readRef.current.add(c.id);
+    markThreadReadAsAdmin(c.id).catch(() => {});
+  }, [c.id, c.isBroadcast, unread]);
 
   const timeline = useMemo(() => {
     const rows = [];
@@ -317,7 +364,8 @@ function Thread({ conversation: c, onSent }) {
         rows.push({ kind: "day", at: item.at, key: `day-${k}` });
         lastDay = k;
       }
-      rows.push({ ...item, key: `${item.kind}-${item.n.id}-${item.at}` });
+      const id = item.n?.id ?? item.m?.id ?? "x";
+      rows.push({ ...item, key: `${item.kind}-${id}-${item.at}` });
     }
     return rows;
   }, [c.items]);
@@ -326,6 +374,31 @@ function Thread({ conversation: c, onSent }) {
     const body = draft.trim();
     if (!body || c.isBroadcast) return;
     setError(null);
+
+    // "General" is real chat; every other type is a structured notification.
+    if (type === "general") {
+      startTransition(async () => {
+        const result = await sendMessageAsAdmin(c.id, body);
+        if (result?.error) {
+          setError(result.error);
+          return;
+        }
+        onSent({
+          convId: c.id,
+          at: new Date().toISOString(),
+          m: {
+            id: `draft-${Math.random().toString(36).slice(2)}`,
+            sender_is_talent: false,
+            body,
+            is_read: false,
+            sender: null,
+          },
+        });
+        setDraft("");
+      });
+      return;
+    }
+
     const fd = new FormData();
     fd.append("talentIds", c.id);
     fd.append("type", type);
@@ -401,6 +474,40 @@ function Thread({ conversation: c, onSent }) {
                 <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                   {dayLabel(row.at)}
                 </span>
+              </div>
+            );
+          }
+
+          if (row.kind === "chat-in") {
+            return (
+              <div key={row.key} className="flex items-end gap-2">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-muted text-[10px] font-semibold text-foreground ring-1 ring-border">
+                  {initials(c.name)}
+                </span>
+                <div className="flex max-w-[min(80%,28rem)] flex-col gap-1">
+                  <div className="bubble bubble-in">
+                    <span className="whitespace-pre-line">{row.m.body}</span>
+                  </div>
+                  <span className="px-1 font-mono text-[10.5px] text-muted-foreground/60">
+                    {timeShort(row.at)}
+                  </span>
+                </div>
+              </div>
+            );
+          }
+
+          if (row.kind === "chat-out") {
+            return (
+              <div key={row.key} className={cn("flex justify-end", row.draft && "opacity-80")}>
+                <div className="flex max-w-[min(80%,28rem)] flex-col items-end gap-1">
+                  <div className="bubble bubble-out">
+                    <span className="whitespace-pre-line">{row.m.body}</span>
+                  </div>
+                  <span className="flex items-center gap-1.5 px-1 font-mono text-[10.5px] text-muted-foreground/60">
+                    {row.m.sender?.full_name && <span>{row.m.sender.full_name} ·</span>}
+                    {timeShort(row.at)}
+                  </span>
+                </div>
               </div>
             );
           }

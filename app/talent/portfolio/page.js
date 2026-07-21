@@ -3,6 +3,7 @@ import { getMyTalentProfile } from "@/lib/queries/talent";
 import { dateShort, statusLabel } from "@/lib/format";
 import { assetTone } from "@/components/talent/status-tones";
 import { PortfolioGallery } from "@/components/talent/portfolio/gallery";
+import { MeasurementsCard } from "@/components/talent/portfolio/measurements-card";
 import { PageHeader, SectionHead, ToneChip } from "@/components/talent/kit";
 
 export default async function PortfolioPage() {
@@ -61,7 +62,7 @@ export default async function PortfolioPage() {
         action={
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-[11.5px] font-medium text-muted-foreground">
             <Lock className="h-3 w-3" />
-            Managed by Candor
+            Photos managed by Candor
           </span>
         }
       />
@@ -116,28 +117,9 @@ export default async function PortfolioPage() {
       </div>
 
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-12">
-        <section className="md:col-span-5">
-          <SectionHead title="Measurements" className="border-b border-border pb-2.5" />
-          {rows.length === 0 ? (
-            <p className="py-8 text-center text-[12.5px] text-muted-foreground">
-              No measurements on file yet — your booker will add them.
-            </p>
-          ) : (
-            <dl className="divide-y divide-border/50">
-              {rows.map((r) => (
-                <div key={r.label} className="flex items-baseline justify-between py-2.5">
-                  <dt className="text-[12.5px] text-muted-foreground">{r.label}</dt>
-                  <dd className="text-[13.5px] font-medium text-foreground">{r.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-          {m?.updated_at && rows.length > 0 && (
-            <p className="mt-3 text-[11.5px] text-muted-foreground/70">
-              Last updated {dateShort(m.updated_at)}
-            </p>
-          )}
-        </section>
+        <div className="md:col-span-5">
+          <MeasurementsCard measurements={m} />
+        </div>
 
         <section className="md:col-span-7">
           <SectionHead

@@ -17,7 +17,18 @@ function eventsOn(bookings, iso) {
   );
 }
 
-export function CalendarView({ year, month, bookings, todayISO }) {
+function awayOn(unavailability, iso) {
+  return unavailability.find((u) => u.start_date <= iso && u.end_date >= iso);
+}
+
+export function CalendarView({
+  year,
+  month,
+  bookings,
+  todayISO,
+  unavailability = [],
+  aside = null,
+}) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const offset = (new Date(year, month - 1, 1).getDay() + 6) % 7; // Mon-start
 
@@ -32,7 +43,7 @@ export function CalendarView({ year, month, bookings, todayISO }) {
 
   return (
     <div>
-      {statusesPresent.length > 0 && (
+      {(statusesPresent.length > 0 || unavailability.length > 0) && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4 text-[11.5px] text-muted-foreground">
           {statusesPresent.map((s) => {
             const tone = bookingTone(s);
@@ -43,6 +54,12 @@ export function CalendarView({ year, month, bookings, todayISO }) {
               </span>
             );
           })}
+          {unavailability.length > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+              Away
+            </span>
+          )}
         </div>
       )}
 
@@ -61,6 +78,7 @@ export function CalendarView({ year, month, bookings, todayISO }) {
                 return <div key={`e${i}`} className="min-h-[96px] bg-surface-muted/40" />;
               }
               const dayEvents = eventsOn(bookings, iso);
+              const away = awayOn(unavailability, iso);
               const isToday = iso === todayISO;
               const isPast = iso < todayISO;
               const dow = new Date(`${iso}T00:00:00`).getDay();
@@ -70,7 +88,11 @@ export function CalendarView({ year, month, bookings, todayISO }) {
                 <div
                   key={iso}
                   className={`relative min-h-[96px] p-2 ${
-                    isWeekend && !isToday ? "bg-surface-muted/40" : ""
+                    away
+                      ? "bg-muted/60"
+                      : isWeekend && !isToday
+                        ? "bg-surface-muted/40"
+                        : ""
                   }`}
                 >
                   <span
@@ -85,6 +107,12 @@ export function CalendarView({ year, month, bookings, todayISO }) {
                   >
                     {Number(iso.slice(-2))}
                   </span>
+
+                  {away && dayEvents.length === 0 && (
+                    <div className="mt-1.5 truncate rounded-md bg-background/60 px-1.5 py-1 text-[10.5px] font-medium text-muted-foreground">
+                      Away{away.reason ? ` · ${away.reason}` : ""}
+                    </div>
+                  )}
 
                   {dayEvents.length > 0 && (
                     <div className="mt-1.5 space-y-1">
@@ -117,7 +145,9 @@ export function CalendarView({ year, month, bookings, todayISO }) {
           </div>
         </div>
 
-        <div className="lg:col-span-4">
+        <div className="space-y-8 lg:col-span-4">
+          {aside}
+          <div>
           <SectionHead title="This month" className="border-b border-border pb-2.5" />
           <ul className="divide-y divide-border/50">
             {bookings.length === 0 ? (
@@ -174,6 +204,7 @@ export function CalendarView({ year, month, bookings, todayISO }) {
               })
             )}
           </ul>
+          </div>
         </div>
       </div>
     </div>
