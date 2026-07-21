@@ -11,7 +11,7 @@ export default async function NewTalentPage() {
     <div>
       <Link
         href="/admin/talent"
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to roster
@@ -23,7 +23,7 @@ export default async function NewTalentPage() {
           meta="New profile"
           title={
             <>
-              Add <span className="editorial-italic">talent</span>
+              Add talent
             </>
           }
           lede="Creates the profile and a login for the talent. They set their password via the forgot-password flow on first sign-in."

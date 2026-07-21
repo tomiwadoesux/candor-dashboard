@@ -27,7 +27,9 @@ export default async function TalentLayout({ children }) {
         <TalentSidebar unread={unread} />
         <div className="flex min-w-0 flex-1 flex-col">
           <TalentTopbar profile={profile} talent={talent} unread={unread} />
-          <main className="flex-1 px-10 pb-16">{children}</main>
+          <main className="flex-1 px-6 pb-16 md:px-10">
+            <div className="mx-auto w-full max-w-[1180px]">{children}</div>
+          </main>
         </div>
         <TalentAiPopup />
       </div>

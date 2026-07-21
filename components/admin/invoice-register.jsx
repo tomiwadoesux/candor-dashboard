@@ -126,7 +126,7 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
                   href={p.booking ? `/admin/bookings/${p.booking.id}` : "/admin/bookings"}
                   className="group inline-flex max-w-full items-baseline gap-1.5"
                 >
-                  <span className="truncate font-serif text-[17px] font-light text-foreground group-hover:underline">
+                  <span className="truncate text-[13.5px] font-medium text-foreground group-hover:underline">
                     {p.booking?.project_title || "Booking"}
                   </span>
                   <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
@@ -141,16 +141,16 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
               </div>
 
               <div className="col-span-2 text-right">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Gross
                 </div>
                 <div
                   data-slot="numeric"
-                  className="mt-0.5 font-serif text-[17px] font-light text-foreground"
+                  className="mt-0.5 text-[13.5px] font-medium text-foreground"
                 >
                   {money(p.gross_fee, p.currency)}
                 </div>
-                <div data-slot="numeric" className="mt-0.5 font-mono text-[10.5px] text-bronze">
+                <div data-slot="numeric" className="mt-0.5 font-mono text-[10.5px] text-brand">
                   comm {money(p.commission_amount, p.currency)}
                 </div>
                 <div
@@ -176,7 +176,7 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
               <div className="col-span-2 flex flex-col items-end gap-1.5">
                 <Link
                   href={`/admin/invoicing/${p.id}/invoice`}
-                  className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze"
+                  className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand"
                 >
                   <FileText className="h-3 w-3" />
                   Invoice
@@ -186,7 +186,7 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
                     type="button"
                     disabled={busyId === p.id}
                     onClick={() => run(p.id, () => markClientPaid(p.id))}
-                    className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze disabled:opacity-60"
+                    className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand disabled:opacity-60"
                   >
                     {busyId === p.id ? "Working…" : "Mark client paid"}
                   </button>
@@ -196,7 +196,7 @@ export function InvoiceRegister({ payments, status = "", canManage = false }) {
                     type="button"
                     disabled={busyId === p.id}
                     onClick={() => run(p.id, () => markTalentPaid(p.id))}
-                    className="pressable inline-flex h-7 items-center gap-1 rounded-full bg-foreground px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-background disabled:opacity-60"
+                    className="pressable inline-flex h-7 items-center gap-1 rounded-lg bg-brand px-2.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-60"
                   >
                     {busyId === p.id ? "Working…" : "Mark talent paid"}
                   </button>

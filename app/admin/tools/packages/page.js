@@ -23,7 +23,7 @@ export default async function PackagesPage() {
         meta={`${packages.length} package${packages.length === 1 ? "" : "s"}`}
         title={
           <>
-            Client <span className="editorial-italic">packages</span>
+            Client packages
           </>
         }
         lede="Curate a selection of talent for a brief and send the client one beautiful, expiring link — then watch when they look."

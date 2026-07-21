@@ -54,10 +54,10 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
               <Link
                 key={f.id || "all"}
                 href={filterHref({ q, status: f.id, category })}
-                className={`pressable inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] transition-colors ${
+                className={`pressable inline-flex h-7 items-center rounded-full px-3 text-[12px] font-medium transition-colors ${
                   active
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
                 {f.label}
@@ -67,21 +67,21 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
         </div>
         <form
           action="/admin/talent"
-          className="ml-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground focus-within:border-foreground/50"
+          className="ml-auto flex h-8 items-center gap-2 rounded-lg border border-input bg-surface px-2.5 text-[12px] text-muted-foreground transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)] focus-within:border-brand/60 focus-within:ring-2 focus-within:ring-ring"
         >
           {status && <input type="hidden" name="status" value={status} />}
-          <Search className="h-3 w-3" />
+          <Search className="h-3.5 w-3.5" />
           <input
             type="text"
             name="q"
             defaultValue={q}
-            placeholder="Search first or last name"
-            className="w-44 bg-transparent text-[11.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            placeholder="Search names…"
+            className="w-40 bg-transparent text-[12.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
           />
           <select
             name="category"
             defaultValue={category}
-            className="bg-transparent text-[11px] text-muted-foreground focus:outline-none"
+            className="bg-transparent text-[12px] text-muted-foreground focus:outline-none"
           >
             <option value="">All categories</option>
             {CATEGORIES.map((c) => (
@@ -92,7 +92,7 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
           </select>
           <button
             type="submit"
-            className="pressable text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+            className="pressable text-[12px] font-medium text-brand hover:text-brand-hover"
           >
             Go
           </button>
@@ -100,16 +100,13 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
       </div>
 
       <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
-        {talent.map((t, i) => (
+        {talent.map((t) => (
           <li key={t.id}>
             <Link
               href={`/admin/talent/${t.id}`}
-              className="group grid grid-cols-12 items-center gap-x-4 gap-y-2 py-4 transition-colors hover:bg-muted/30"
+              className="group grid grid-cols-12 items-center gap-x-4 gap-y-2 px-2 py-3.5 transition-colors hover:bg-surface-muted/60"
             >
-              <div className="col-span-1 font-mono text-[10px] text-muted-foreground/60">
-                №{String(i + 1).padStart(3, "0")}
-              </div>
-              <div className="col-span-5 flex min-w-0 items-center gap-4">
+              <div className="col-span-6 flex min-w-0 items-center gap-3.5">
                 {t.polaroid_url ? (
                   <Image
                     src={t.polaroid_url}
@@ -120,14 +117,14 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
                     className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border/60"
                   />
                 ) : (
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted/60 font-serif text-[15px] font-light italic text-foreground ring-1 ring-border/60">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted/60 text-[13.5px] font-medium text-foreground ring-1 ring-border/60">
                     {t.first_name?.[0]}
                     {t.last_name?.[0]}
                   </span>
                 )}
                 <div className="min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <span className="truncate font-serif text-[18px] font-light text-foreground">
+                    <span className="truncate text-[13.5px] font-medium text-foreground">
                       {t.first_name} {t.last_name}
                     </span>
                     {t.instagram_handle && (
@@ -137,7 +134,7 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
                     )}
                   </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
-                    <span className="uppercase tracking-[0.1em]">
+                    <span className="">
                       {statusLabel(t.category)}
                     </span>
                     <span>·</span>
@@ -152,29 +149,23 @@ export function TalentRoster({ talent, q = "", status = "", category = "" }) {
                 </div>
               </div>
               <div className="col-span-3">
-                <div className="text-[11px] text-muted-foreground">
+                <div className="text-[12px] text-muted-foreground">
                   {statusLabel(t.exclusivity)} · {statusLabel(t.contract_type)}
                 </div>
-                <div className="mt-0.5 text-[10.5px] text-muted-foreground/80">
+                <div className="mt-0.5 text-[11.5px] text-muted-foreground/70">
                   {t.contract_end_date
-                    ? `Contract ends ${dateShort(t.contract_end_date)}`
-                    : "No contract end date"}
+                    ? `Ends ${dateShort(t.contract_end_date)}`
+                    : "Open-ended"}
                 </div>
               </div>
-              <div className="col-span-2 text-right">
-                <div
-                  data-slot="numeric"
-                  className="font-serif text-[22px] font-light leading-none text-foreground"
-                >
+              <div className="col-span-1 text-right">
+                <span data-slot="numeric" className="text-[13px] font-medium text-foreground">
                   {Number(t.commission_rate)}%
-                </div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  commission
-                </div>
+                </span>
               </div>
-              <div className="col-span-1 flex items-center justify-end gap-2">
+              <div className="col-span-2 flex items-center justify-end gap-2">
                 <StatusPill status={t.status} accent={talentAccent(t.status)} />
-                <ArrowUpRight className="h-3 w-3 text-muted-foreground/40 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                <ArrowUpRight className="h-3 w-3 text-muted-foreground/40 transition-[transform,color] duration-200 ease-[var(--ease-out)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
               </div>
             </Link>
           </li>

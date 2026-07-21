@@ -10,7 +10,7 @@ export function InvoiceToolbar({ paymentId, isRemittance }) {
       <button
         type="button"
         onClick={() => window.print()}
-        className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-background"
+        className="pressable inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
       >
         <Printer className="h-3 w-3" />
         Print / Save as PDF
@@ -21,7 +21,7 @@ export function InvoiceToolbar({ paymentId, isRemittance }) {
             ? `/admin/invoicing/${paymentId}/invoice`
             : `/admin/invoicing/${paymentId}/invoice?type=remittance`
         }
-        className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze"
+        className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand"
       >
         <Repeat className="h-3 w-3" />
         {isRemittance ? "View client invoice" : "View talent remittance"}

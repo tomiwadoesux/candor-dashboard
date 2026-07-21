@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const RailContext = createContext(null);
 
@@ -9,8 +10,18 @@ export const MODES = {
   PROFILE: "profile",
 };
 
-export function RailProvider({ children, initialMode = MODES.DASHBOARD }) {
-  const [mode, setMode] = useState(initialMode);
+const PROFILE_ROUTES = ["/talent/portfolio", "/talent/directory"];
+
+// Mode is derived from the route, so the rail and sidebar can never drift
+// out of sync with where the user actually is.
+export function RailProvider({ children }) {
+  const pathname = usePathname();
+  const mode = PROFILE_ROUTES.some(
+    (r) => pathname === r || pathname.startsWith(r + "/")
+  )
+    ? MODES.PROFILE
+    : MODES.DASHBOARD;
+
   const [aiOpen, setAiOpen] = useState(false);
 
   const openAi = useCallback(() => setAiOpen(true), []);
@@ -18,7 +29,7 @@ export function RailProvider({ children, initialMode = MODES.DASHBOARD }) {
   const toggleAi = useCallback(() => setAiOpen((v) => !v), []);
 
   const value = useMemo(
-    () => ({ mode, setMode, aiOpen, openAi, closeAi, toggleAi }),
+    () => ({ mode, aiOpen, openAi, closeAi, toggleAi }),
     [mode, aiOpen, openAi, closeAi, toggleAi]
   );
 

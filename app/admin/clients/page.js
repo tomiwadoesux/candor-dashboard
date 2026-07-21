@@ -20,7 +20,7 @@ export default async function ClientsAdminPage({ searchParams }) {
       <PageIntro
         eyebrow="Operations · Clients"
         meta={`${clients.length} on file`}
-        title={<span className="editorial-italic">Clients</span>}
+        title="Clients"
         lede="Everyone who books Candor talent — brands, fashion houses, editorial desks. Contact details and payment terms in one view."
       />
 
@@ -31,7 +31,7 @@ export default async function ClientsAdminPage({ searchParams }) {
           label="New clients"
           value={clients.length - established}
           sub="100% upfront terms"
-          accent="bronze"
+          accent="brand"
         />
         <Stat label="Lifetime bookings" value={totalBookings} sub="Across the roster" />
       </div>

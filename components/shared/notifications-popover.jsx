@@ -11,7 +11,7 @@ function kindDot(kind) {
       return "bg-success";
     case "general":
     case "announcement":
-      return "bg-bronze";
+      return "bg-brand";
     case "booking_update":
     case "availability_check":
     case "pre_job_brief":
@@ -62,23 +62,21 @@ export function NotificationsPopover({ trigger, items = [] }) {
       )}
 
       {open && (
-        <div className="absolute right-0 top-full z-40 mt-2 w-[360px] overflow-hidden rounded-lg border border-border bg-background shadow-[var(--shadow-lift)]">
-          <div className="flex items-center justify-between border-b border-border/60 px-3 py-2.5">
-            <div className="flex items-baseline gap-2">
-              <span className="font-serif text-[15px] italic text-foreground">
-                Notifications
+        <div className="slide-up-in absolute right-0 top-full z-40 mt-2 w-[360px] origin-top-right overflow-hidden rounded-xl border border-border bg-popover shadow-[var(--shadow-pop)]">
+          <div className="flex items-baseline justify-between border-b border-border/60 px-3.5 py-2.5">
+            <span className="text-[13px] font-medium text-foreground">
+              Notifications
+            </span>
+            {unread > 0 && (
+              <span className="text-[11.5px] font-medium text-brand">
+                {unread} new
               </span>
-              {unread > 0 && (
-                <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
-                  {unread} new
-                </span>
-              )}
-            </div>
+            )}
           </div>
 
           <ul className="max-h-[420px] overflow-y-auto divide-y divide-border/60">
             {items.length === 0 && (
-              <li className="px-4 py-10 text-center text-[12px] text-muted-foreground">
+              <li className="px-4 py-10 text-center text-[12.5px] text-muted-foreground">
                 No notifications yet.
               </li>
             )}
@@ -86,8 +84,8 @@ export function NotificationsPopover({ trigger, items = [] }) {
               <li
                 key={n.id}
                 className={cn(
-                  "flex items-start gap-3 px-3 py-3 transition-colors hover:bg-surface-muted/50",
-                  !n.isRead && "bg-primary/[0.035]"
+                  "flex items-start gap-3 px-3.5 py-3 transition-colors hover:bg-surface-muted/50",
+                  !n.isRead && "bg-brand/[0.04]"
                 )}
               >
                 <span
@@ -101,11 +99,11 @@ export function NotificationsPopover({ trigger, items = [] }) {
                     <div className="truncate text-[12.5px] font-medium text-foreground">
                       {n.title}
                     </div>
-                    <div className="shrink-0 font-mono text-[10px] text-muted-foreground/70">
+                    <div className="shrink-0 font-mono text-[10.5px] text-muted-foreground/70">
                       {relativeTime(n.createdAt)}
                     </div>
                   </div>
-                  <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-relaxed text-muted-foreground">
+                  <div className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
                     {n.body}
                   </div>
                 </div>

@@ -46,7 +46,7 @@ const TRANSITIONS = {
 function SectionHead({ label, meta }) {
   return (
     <div className="flex items-baseline justify-between pb-3">
-      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         {label}
       </div>
       {meta && (
@@ -60,7 +60,7 @@ export function BookingDetail({ booking: b, canManagePayments }) {
   return (
     <div>
       <div className="mt-6 flex items-baseline justify-between pb-2">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Bookings · {b.service_type || "Job"}
         </div>
         <div className="font-mono text-[11px] text-muted-foreground">
@@ -70,8 +70,8 @@ export function BookingDetail({ booking: b, canManagePayments }) {
 
       <div className="grid grid-cols-12 items-start gap-x-6 border-b border-border/60 pb-8">
         <div className="col-span-8 min-w-0">
-          <h1 className="font-serif text-[38px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
-            <span className="editorial-italic">{b.project_title}</span>
+          <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            <span>{b.project_title}</span>
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11.5px] text-muted-foreground">
             <span>{dateLong(b.booking_date)}</span>
@@ -107,7 +107,7 @@ export function BookingDetail({ booking: b, canManagePayments }) {
         <div className="col-span-4 text-right">
           <div
             data-slot="numeric"
-            className="font-serif text-[30px] font-light leading-none text-foreground"
+            className="text-[22px] font-semibold tracking-[-0.02em] leading-none text-foreground"
           >
             {money(b.talent_fee, b.fee_currency)}
           </div>
@@ -170,7 +170,7 @@ function StatusActions({ booking: b }) {
                   setTarget(null);
                 });
               }}
-              className={`pressable inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] transition-colors disabled:opacity-60 ${
+              className={`pressable inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-[11.5px] font-medium transition-colors disabled:opacity-60 ${
                 destructive
                   ? "border-destructive/40 text-destructive hover:bg-destructive/5"
                   : "border-border bg-card text-muted-foreground hover:border-foreground hover:text-foreground"
@@ -215,7 +215,7 @@ function DealTerms({ booking: b }) {
           <div className="grid grid-cols-2 gap-x-8 gap-y-5 md:grid-cols-3">
             {rows.map(([label, value]) => (
               <div key={label}>
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   {label}
                 </div>
                 <div className="mt-1 text-[13px] text-foreground">{value}</div>
@@ -223,7 +223,7 @@ function DealTerms({ booking: b }) {
             ))}
           </div>
           {b.notes && (
-            <p className="mt-5 max-w-[70ch] border-l border-border/60 pl-4 font-serif text-[14px] font-light italic leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-[70ch] border-l border-border/60 pl-4 text-[12.5px] leading-relaxed text-muted-foreground">
               {b.notes}
             </p>
           )}
@@ -273,7 +273,7 @@ function FlagButton({ label, on, disabled, onClick }) {
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`pressable inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] transition-colors disabled:opacity-60 ${
+      className={`pressable inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-[11.5px] font-medium transition-colors disabled:opacity-60 ${
         on
           ? "border-success/40 text-success"
           : "border-border bg-card text-muted-foreground hover:border-foreground hover:text-foreground"
@@ -316,7 +316,7 @@ function PaymentsSection({ booking: b, canManagePayments }) {
               </div>
               <div
                 data-slot="numeric"
-                className="col-span-2 text-right font-serif text-[16px] font-light text-foreground"
+                className="col-span-2 text-right text-[13.5px] font-medium text-foreground"
               >
                 {money(p.gross_fee, p.currency)}
               </div>
@@ -332,7 +332,7 @@ function PaymentsSection({ booking: b, canManagePayments }) {
               <div className="col-span-2 text-right">
                 <Link
                   href={`/admin/invoicing/${p.id}/invoice`}
-                  className="pressable inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-bronze"
+                  className="pressable inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-brand"
                 >
                   <FileText className="h-3 w-3" />
                   Invoice
@@ -349,7 +349,7 @@ function PaymentsSection({ booking: b, canManagePayments }) {
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-background"
+              className="pressable inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
             >
               <Receipt className="h-3 w-3" />
               Raise payment
@@ -360,7 +360,7 @@ function PaymentsSection({ booking: b, canManagePayments }) {
               className="space-y-4 rounded-sm border border-border/60 bg-muted/20 p-5"
             >
               <input type="hidden" name="bookingId" value={b.id} />
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+              <div className="text-[11.5px] font-medium text-muted-foreground/70">
                 New payment · commission snapshots at{" "}
                 {b.talent?.commission_rate != null
                   ? `${Number(b.talent.commission_rate)}%`
@@ -419,14 +419,14 @@ function HistorySection({ history }) {
                     ? "bg-success"
                     : bookingAccent(h.new_status) === "destructive"
                       ? "bg-destructive"
-                      : bookingAccent(h.new_status) === "bronze"
-                        ? "bg-bronze"
+                      : bookingAccent(h.new_status) === "brand"
+                        ? "bg-brand"
                         : "bg-muted-foreground"
                 }`}
               />
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                 <span
-                  className={`text-[11px] uppercase tracking-[0.12em] ${accentText(bookingAccent(h.new_status))}`}
+                  className={`text-[11.5px] font-medium ${accentText(bookingAccent(h.new_status))}`}
                 >
                   {h.old_status
                     ? `${statusLabel(h.old_status)} → ${statusLabel(h.new_status)}`
@@ -467,11 +467,11 @@ function DocumentsSection({ documents }) {
               >
                 <div className="col-span-7 flex min-w-0 items-center gap-2">
                   <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  <span className="truncate font-serif text-[15px] font-light text-foreground group-hover:underline">
+                  <span className="truncate text-[13.5px] font-medium text-foreground group-hover:underline">
                     {d.title}
                   </span>
                 </div>
-                <div className="col-span-3 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <div className="col-span-3 text-[11.5px] font-medium text-muted-foreground">
                   {statusLabel(d.document_type)}
                 </div>
                 <div className="col-span-2 text-right font-mono text-[11px] text-muted-foreground">

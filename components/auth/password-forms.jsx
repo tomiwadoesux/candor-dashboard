@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
       <Button
         type="submit"
         size="lg"
-        className="pressable w-full"
+        variant="brand" className="w-full"
         disabled={pending}
       >
         {pending ? "Sending…" : "Send reset link"}
@@ -49,7 +49,7 @@ export function ForgotPasswordForm() {
       <p className="text-center text-sm text-muted-foreground">
         <Link
           href="/login"
-          className="transition-colors hover:text-accent-foreground"
+          className="font-medium text-brand transition-colors hover:text-brand-hover"
         >
           Back to sign in
         </Link>
@@ -88,7 +88,7 @@ export function ResetPasswordForm() {
       <Button
         type="submit"
         size="lg"
-        className="pressable w-full"
+        variant="brand" className="w-full"
         disabled={pending}
       >
         {pending ? "Saving…" : "Set new password"}

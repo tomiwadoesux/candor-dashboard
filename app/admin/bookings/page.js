@@ -22,14 +22,14 @@ export default async function BookingsAdminPage({ searchParams }) {
       <PageIntro
         eyebrow="Operations · Bookings"
         meta={`${bookings.length} on record`}
-        title={<span className="editorial-italic">Bookings</span>}
+        title="Bookings"
         lede="Every live, confirmed and pending job across the roster. Tap a row for deal terms, status history and payments."
       />
 
       <div className="mt-6 flex justify-end">
         <Link
           href="/admin/bookings/new"
-          className="pressable inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-[11.5px] font-medium uppercase tracking-[0.14em] text-background"
+          className="pressable inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand px-4 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
         >
           <Plus className="h-3.5 w-3.5" />
           New booking
@@ -39,7 +39,7 @@ export default async function BookingsAdminPage({ searchParams }) {
       <div className="mt-6 grid grid-cols-2 gap-8 border-y border-border/60 py-6 md:grid-cols-4">
         <Stat label="Confirmed" value={confirmed} sub="Signed off" accent="success" />
         <Stat label="Pending" value={pending} sub="Awaiting confirmation" accent="warning" />
-        <Stat label="Casting sent" value={castingSent} sub="Out to talent" accent="bronze" />
+        <Stat label="Casting sent" value={castingSent} sub="Out to talent" accent="brand" />
         <Stat label="Completed" value={completed} sub="Wrapped" />
       </div>
 

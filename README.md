@@ -18,11 +18,15 @@ candor-management.com.
 Next.js 16 (App Router, JS) · Tailwind v4 · Base UI (shadcn "base-nova") ·
 Supabase (Postgres 17, Auth, RLS) · Hugging Face Inference (AI assistant).
 
-Design system: **"Ink & Bone"** — gallery-light default (bone/ivory + ink) with
-a luxury-dark mode, bronze accent, Instrument Serif / Hanken Grotesk /
-IBM Plex Mono. Motion follows design-engineering rules: exact transition
-properties, strong ease-out curves, everything ≤300ms, reduced-motion
-supported.
+Design system: **"Porcelain"** — near-white porcelain surfaces with cool ink
+type and one disciplined accent, petrol blue `#00749E`, used only where it
+means something (primary actions, links, active states, unread, outgoing
+chat). Ink dark mode. Type: Geist (UI) / Geist Mono (money, dates, IDs) /
+Newsreader (rare editorial italic). Motion follows design-engineering rules:
+exact transition properties, strong ease-out curves, everything ≤240ms,
+press feedback on everything pressable, reduced-motion supported.
+Communications is a real conversation UI on both sides — talent chat with
+action cards, admin split-pane messenger with per-talent threads.
 
 ## Setup
 

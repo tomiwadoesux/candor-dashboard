@@ -10,6 +10,22 @@ function niceMax(v) {
   return step * mag;
 }
 
+// Vertical bar with the data-end rounded and the baseline end square.
+function barPath(x, y, w, h, up = true) {
+  const r = Math.min(3, w / 2, h);
+  if (h <= 0.5) return "";
+  if (!up) return `M ${x} ${y} H ${x + w} V ${y + h} H ${x} Z`;
+  return [
+    `M ${x} ${y + h}`,
+    `V ${y + r}`,
+    `Q ${x} ${y} ${x + r} ${y}`,
+    `H ${x + w - r}`,
+    `Q ${x + w} ${y} ${x + w} ${y + r}`,
+    `V ${y + h}`,
+    "Z",
+  ].join(" ");
+}
+
 /**
  * BarChart — vertical bars, can be stacked or grouped.
  * data: [{ label, values: [...] }]
@@ -50,9 +66,9 @@ export function BarChart({
   );
 
   const bandW = innerW / data.length;
-  const gap = bandW * 0.22;
+  const gap = bandW * 0.28;
   const groupW = bandW - gap;
-  const barW = stacked ? groupW : groupW / series.length;
+  const barW = stacked ? groupW : (groupW - 2 * (series.length - 1)) / series.length;
 
   return (
     <div ref={wrapRef} className="relative w-full select-none">
@@ -61,6 +77,7 @@ export function BarChart({
         width="100%"
         height={height}
         className="block overflow-visible"
+        role="img"
       >
         {/* grid */}
         {[0, 0.25, 0.5, 0.75, 1].map((g, i) => (
@@ -71,15 +88,14 @@ export function BarChart({
               y1={padT + innerH * (1 - g)}
               y2={padT + innerH * (1 - g)}
               stroke="currentColor"
-              className="text-border/60"
+              className={g === 0 ? "text-border" : "text-border/50"}
               strokeWidth="1"
-              strokeDasharray={g === 0 ? "0" : "2 4"}
             />
             <text
               x={padL - 8}
               y={padT + innerH * (1 - g) + 3}
               textAnchor="end"
-              className="fill-muted-foreground font-mono text-[9px]"
+              className="fill-muted-foreground font-mono text-[10px]"
             >
               {formatValue(Math.round(max * g))}
             </text>
@@ -95,7 +111,7 @@ export function BarChart({
               x={padL + bandW * i + bandW / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[9.5px] uppercase tracking-[0.1em]"
+              className="fill-muted-foreground font-mono text-[10px]"
             >
               {d.label}
             </text>
@@ -110,42 +126,53 @@ export function BarChart({
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover(null)}
             >
+              {/* invisible hover target across the whole band */}
+              <rect
+                x={padL + bandW * i}
+                y={padT}
+                width={bandW}
+                height={innerH}
+                fill="transparent"
+              />
               {series.map((s, si) => {
                 const v = d.values[si] || 0;
                 const h = (v / max) * innerH;
                 if (stacked) {
+                  const isTop = si === series.length - 1;
+                  const segH = Math.max(0, h - (isTop ? 0 : 2));
                   const y = stackY - h;
                   stackY = y;
                   return (
-                    <rect
+                    <path
                       key={s.key || si}
-                      x={padL + bandW * i + gap / 2}
-                      y={y}
-                      width={barW}
-                      height={h}
-                      rx={2}
+                      d={
+                        isTop
+                          ? barPath(padL + bandW * i + gap / 2, y, barW, segH)
+                          : `M ${padL + bandW * i + gap / 2} ${y + 2} H ${padL + bandW * i + gap / 2 + barW} V ${y + 2 + segH} H ${padL + bandW * i + gap / 2} Z`
+                      }
                       fill={s.color}
-                      opacity={hover === null || hover === i ? 1 : 0.55}
+                      opacity={hover === null || hover === i ? 1 : 0.45}
                       style={{
                         transformOrigin: `${padL + bandW * i + groupW / 2}px ${padT + innerH}px`,
-                        animation: `bar-grow 700ms ${50 * i}ms cubic-bezier(0.22,0.61,0.36,1) both`,
+                        animation: `bar-grow 500ms ${30 * i}ms cubic-bezier(0.23,1,0.32,1) both`,
                       }}
                     />
                   );
                 }
                 return (
-                  <rect
+                  <path
                     key={s.key || si}
-                    x={padL + bandW * i + gap / 2 + barW * si}
-                    y={padT + innerH - h}
-                    width={barW - 1.5}
-                    height={h}
-                    rx={2}
+                    d={barPath(
+                      padL + bandW * i + gap / 2 + (barW + 2) * si,
+                      padT + innerH - h,
+                      barW,
+                      h
+                    )}
                     fill={s.color}
-                    opacity={hover === null || hover === i ? 1 : 0.55}
+                    opacity={hover === null || hover === i ? 1 : 0.45}
                     style={{
                       transformOrigin: `${padL + bandW * i + groupW / 2}px ${padT + innerH}px`,
-                      animation: `bar-grow 700ms ${50 * i}ms cubic-bezier(0.22,0.61,0.36,1) both`,
+                      animation: `bar-grow 500ms ${30 * i}ms cubic-bezier(0.23,1,0.32,1) both`,
                     }}
                   />
                 );
@@ -157,12 +184,12 @@ export function BarChart({
 
       {hover !== null && (
         <div
-          className="pointer-events-none absolute top-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-[11px] shadow-[var(--shadow-lift)]"
+          className="pointer-events-none absolute top-2 rounded-lg border border-border bg-popover px-2.5 py-1.5 text-[11.5px] shadow-[var(--shadow-lift)]"
           style={{
             left: Math.min(w - 160, Math.max(0, padL + bandW * hover + bandW / 2 - 70)),
           }}
         >
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="font-mono text-[10.5px] text-muted-foreground">
             {data[hover].label}
           </div>
           {series.map((s, si) => (
@@ -172,7 +199,7 @@ export function BarChart({
                 style={{ backgroundColor: s.color }}
               />
               <span className="text-muted-foreground">{s.label}</span>
-              <span className="ml-auto font-mono text-foreground">
+              <span className="ml-auto pl-3 font-mono text-foreground" data-slot="numeric">
                 {formatValue(data[hover].values[si])}
               </span>
             </div>
@@ -189,8 +216,14 @@ export function BarChart({
             transform: scaleY(1);
           }
         }
-        rect {
+        path {
           transform-box: fill-box;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          path {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+          }
         }
       `}</style>
     </div>

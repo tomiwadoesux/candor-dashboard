@@ -63,7 +63,7 @@ export default async function SettingsAdminPage() {
         meta="Candor Management · Lagos"
         title={
           <>
-            House <span className="editorial-italic">rules</span>
+            House rules
           </>
         }
         lede="Who does what, and how the agency defaults fall. Team changes here ripple through every login."
@@ -86,7 +86,7 @@ export default async function SettingsAdminPage() {
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Who can do what
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -94,7 +94,7 @@ export default async function SettingsAdminPage() {
           </span>
         </div>
         <div className="border-y border-border/60">
-          <div className="grid grid-cols-12 items-baseline py-3 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
+          <div className="grid grid-cols-12 items-baseline py-3 text-[11.5px] font-medium text-muted-foreground/70">
             <div className="col-span-6">Action</div>
             <div className="col-span-2 text-center">Booker</div>
             <div className="col-span-2 text-center">MD</div>
@@ -117,7 +117,7 @@ export default async function SettingsAdminPage() {
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Defaults
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -131,7 +131,7 @@ export default async function SettingsAdminPage() {
                 <div className="col-span-4 text-[12.5px] text-muted-foreground">
                   {d.label}
                 </div>
-                <div className="col-span-5 font-serif text-[20px] font-light text-foreground">
+                <div className="col-span-5 text-[15px] font-semibold text-foreground">
                   {d.value}
                 </div>
                 <div className="col-span-3 text-right text-[11px] text-muted-foreground/80">
@@ -150,7 +150,7 @@ function Perm({ col }) {
   return (
     <div className="col-span-2 text-center">
       {col ? (
-        <span className="font-serif text-[15px] text-foreground">●</span>
+        <span className="text-[15px] text-foreground">●</span>
       ) : (
         <span className="font-mono text-[12px] text-muted-foreground/40">—</span>
       )}

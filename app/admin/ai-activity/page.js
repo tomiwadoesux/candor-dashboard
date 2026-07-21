@@ -25,7 +25,7 @@ function Transcript({ convo }) {
           <Sparkles className="h-3.5 w-3.5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="font-serif text-[15px] italic leading-tight text-foreground">
+          <div className="text-[13.5px] font-medium leading-tight text-foreground">
             Ask Candor · {convo.talent.first_name} {convo.talent.last_name}
           </div>
           <div className="text-[11px] text-muted-foreground">
@@ -33,7 +33,7 @@ function Transcript({ convo }) {
             activity {relativeTime(convo.updatedAt)} · read-only
           </div>
         </div>
-        <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground">
           Viewing
         </span>
       </div>
@@ -102,7 +102,7 @@ export default async function AiActivityPage({ searchParams }) {
         meta={`${conversations.length} conversation${conversations.length === 1 ? "" : "s"}`}
         title={
           <>
-            Ask Candor <span className="editorial-italic">activity</span>
+            Ask Candor activity
           </>
         }
         lede="Every question talent ask their assistant and the answer it gave, grounded in their own account only. Read-only — you're observing, not replying."

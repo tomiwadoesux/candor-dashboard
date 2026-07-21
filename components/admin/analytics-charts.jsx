@@ -15,12 +15,32 @@ const CHART_COLORS = [
   "var(--chart-5)",
 ];
 
+// The payment pipeline is status data, so it wears the status tokens.
+const PIPELINE_COLORS = {
+  awaiting_client_payment: "var(--warning)",
+  client_paid: "var(--chart-1)",
+  talent_paid: "var(--success)",
+};
+
 function Legend({ color, label }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: color }} />
       {label}
     </span>
+  );
+}
+
+function ChartHeader({ title, children }) {
+  return (
+    <div className="flex items-baseline justify-between pb-3">
+      <h2 className="text-[13px] font-medium text-foreground">{title}</h2>
+      {children && (
+        <div className="flex items-center gap-4 text-[11.5px] text-muted-foreground">
+          {children}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -33,7 +53,7 @@ export function AnalyticsCharts({
   const pipelineData = pipeline.map((p, i) => ({
     label: p.label,
     value: p.count,
-    color: CHART_COLORS[i % CHART_COLORS.length],
+    color: PIPELINE_COLORS[p.status] ?? CHART_COLORS[i % CHART_COLORS.length],
   }));
   const hasPipeline = pipeline.some((p) => p.count > 0);
 
@@ -51,26 +71,19 @@ export function AnalyticsCharts({
   }));
 
   return (
-    <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-5">
+    <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
       <section className="lg:col-span-2">
-        <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-            Payment pipeline
-          </div>
-          <span className="font-mono text-[10px] text-muted-foreground/70">
-            Count by status
-          </span>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
+        <ChartHeader title="Payment pipeline" />
+        <div className="rounded-xl border border-border bg-card p-5">
           {hasPipeline ? (
             <DonutChart
               data={pipelineData}
-              size={200}
-              thickness={24}
+              size={190}
+              thickness={22}
               formatValue={(v) => `${v}`}
             />
           ) : (
-            <p className="py-12 text-center text-[12px] text-muted-foreground">
+            <p className="py-12 text-center text-[12.5px] text-muted-foreground">
               No payments yet — the pipeline fills in as bookings invoice.
             </p>
           )}
@@ -78,16 +91,11 @@ export function AnalyticsCharts({
       </section>
 
       <section className="lg:col-span-3">
-        <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-            Year to date · by currency
-          </div>
-          <div className="flex items-center gap-4 font-mono text-[10px] text-muted-foreground">
-            <Legend color={CHART_COLORS[0]} label="Revenue" />
-            <Legend color={CHART_COLORS[1]} label="Commission" />
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
+        <ChartHeader title="Year to date, by currency">
+          <Legend color={CHART_COLORS[0]} label="Revenue" />
+          <Legend color={CHART_COLORS[1]} label="Commission" />
+        </ChartHeader>
+        <div className="rounded-xl border border-border bg-card p-5">
           {revenueData.length > 0 ? (
             <BarChart
               height={220}
@@ -99,7 +107,7 @@ export function AnalyticsCharts({
               formatValue={(v) => compact.format(v)}
             />
           ) : (
-            <p className="py-12 text-center text-[12px] text-muted-foreground">
+            <p className="py-12 text-center text-[12.5px] text-muted-foreground">
               No revenue recorded this year yet.
             </p>
           )}
@@ -108,22 +116,17 @@ export function AnalyticsCharts({
 
       {topCasting.length > 0 && (
         <section className="lg:col-span-5">
-          <div className="flex items-baseline justify-between pb-3">
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-              Casting engagement · top talent
-            </div>
-            <div className="flex items-center gap-4 font-mono text-[10px] text-muted-foreground">
-              <Legend color={CHART_COLORS[2]} label="Interested" />
-              <Legend color={CHART_COLORS[3]} label="Selected" />
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
+          <ChartHeader title="Casting engagement — top talent">
+            <Legend color={CHART_COLORS[0]} label="Interested" />
+            <Legend color={CHART_COLORS[1]} label="Selected" />
+          </ChartHeader>
+          <div className="rounded-xl border border-border bg-card p-5">
             <BarChart
               height={220}
               data={topCasting}
               series={[
-                { key: "int", label: "Interested", color: CHART_COLORS[2] },
-                { key: "sel", label: "Selected", color: CHART_COLORS[3] },
+                { key: "int", label: "Interested", color: CHART_COLORS[0] },
+                { key: "sel", label: "Selected", color: CHART_COLORS[1] },
               ]}
               formatValue={(v) => `${v}`}
             />

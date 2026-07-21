@@ -15,9 +15,9 @@ export default async function AnalyticsAdminPage() {
   ]);
 
   const pipeline = [
-    { label: "Awaiting client", count: summary.awaiting.count },
-    { label: "Client paid", count: summary.clientPaid.count },
-    { label: "Talent paid", count: summary.talentPaid.count },
+    { label: "Awaiting client", status: "awaiting_client_payment", count: summary.awaiting.count },
+    { label: "Client paid", status: "client_paid", count: summary.clientPaid.count },
+    { label: "Talent paid", status: "talent_paid", count: summary.talentPaid.count },
   ];
 
   return (
@@ -27,7 +27,7 @@ export default async function AnalyticsAdminPage() {
         meta="MD & CEO only"
         title={
           <>
-            The <span className="editorial-italic">numbers</span>
+            The numbers
           </>
         }
         lede="A candid look at the business. What's moving, who's earning, where the work is coming from — straight from the live ledger."
@@ -44,7 +44,7 @@ export default async function AnalyticsAdminPage() {
           label="Commission · YTD"
           value={moneyList(summary.ytdCommission, "—")}
           sub="Agency share"
-          accent="bronze"
+          accent="brand"
         />
         <Stat
           label="Active talent"
@@ -68,7 +68,7 @@ export default async function AnalyticsAdminPage() {
 
       <section className="mt-12">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Roster · casting performance
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -88,32 +88,32 @@ export default async function AnalyticsAdminPage() {
                     №{String(i + 1).padStart(2, "0")}
                   </div>
                   <div className="col-span-3">
-                    <h3 className="font-serif text-[19px] font-light text-foreground">
+                    <h3 className="text-[13.5px] font-medium text-foreground">
                       {t.first_name} {t.last_name}
                     </h3>
-                    <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <div className="mt-0.5 font-mono text-[10.5px] text-muted-foreground/70">
                       {t.category}
                     </div>
                   </div>
                   <div className="col-span-2 text-right">
-                    <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <div className="text-[11.5px] font-medium text-muted-foreground/70">
                       Responses
                     </div>
                     <div
                       data-slot="numeric"
-                      className="mt-0.5 font-serif text-[18px] font-light text-foreground"
+                      className="mt-0.5 text-[13.5px] font-medium text-foreground"
                     >
                       {t.responses_count}
                     </div>
                   </div>
                   <div className="col-span-3">
-                    <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <div className="text-[11.5px] font-medium text-muted-foreground/70">
                       Interested
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">
                       <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-border/40">
                         <div
-                          className="h-full rounded-full bg-bronze transition-[width] duration-200 ease-out"
+                          className="h-full rounded-full bg-brand transition-[width] duration-200 ease-out"
                           style={{
                             width: `${
                               t.responses_count
@@ -132,7 +132,7 @@ export default async function AnalyticsAdminPage() {
                     </div>
                   </div>
                   <div className="col-span-3">
-                    <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <div className="text-[11.5px] font-medium text-muted-foreground/70">
                       Selection rate
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">

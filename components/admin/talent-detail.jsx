@@ -72,7 +72,7 @@ function assetAccent(v) {
 function SectionHead({ label, meta }) {
   return (
     <div className="flex items-baseline justify-between pb-3">
-      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         {label}
       </div>
       {meta && (
@@ -90,7 +90,7 @@ export function TalentDetail({ talent: t, analytics, viewerRole }) {
   return (
     <div>
       <div className="mt-6 flex items-baseline justify-between pb-2">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Roster · {statusLabel(t.category)}
         </div>
         <div className="font-mono text-[11px] text-muted-foreground">ID · {t.id.slice(0, 8)}</div>
@@ -108,15 +108,15 @@ export function TalentDetail({ talent: t, analytics, viewerRole }) {
               className="h-20 w-20 rounded-full object-cover ring-1 ring-border/60"
             />
           ) : (
-            <span className="grid h-20 w-20 place-items-center rounded-full bg-muted/60 font-serif text-[26px] font-light italic text-foreground ring-1 ring-border/60">
+            <span className="grid h-20 w-20 place-items-center rounded-full bg-muted/60 text-[15px] font-semibold italic text-foreground ring-1 ring-border/60">
               {t.first_name?.[0]}
               {t.last_name?.[0]}
             </span>
           )}
         </div>
         <div className="col-span-7">
-          <h1 className="font-serif text-[44px] font-light leading-[1.02] tracking-[-0.02em] text-foreground">
-            {t.first_name} <span className="editorial-italic">{t.last_name}</span>
+          <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            {t.first_name} <span>{t.last_name}</span>
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11.5px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
@@ -133,30 +133,30 @@ export function TalentDetail({ talent: t, analytics, viewerRole }) {
             <span>Joined {dateShort(t.created_at)}</span>
           </div>
           {t.bio && (
-            <p className="mt-3 max-w-[64ch] font-serif text-[14px] font-light italic leading-relaxed text-muted-foreground">
+            <p className="mt-3 max-w-[64ch] text-[12.5px] leading-relaxed text-muted-foreground">
               {t.bio}
             </p>
           )}
         </div>
         <div className="col-span-3 text-right">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Status
           </div>
           <div className="mt-1">
             <StatusPill status={t.status} accent={talentAccent(t.status)} className="text-[12px]" />
           </div>
-          <div className="mt-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+          <div className="mt-3 text-[11.5px] font-medium text-muted-foreground/70">
             Public roster
           </div>
-          <div className="mt-1 text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="mt-1 text-[12px] text-muted-foreground">
             {t.is_public ? "Visible" : "Hidden"}
           </div>
-          <div className="mt-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+          <div className="mt-3 text-[11.5px] font-medium text-muted-foreground/70">
             Commission
           </div>
           <div
             data-slot="numeric"
-            className="mt-1 font-serif text-[24px] font-light text-foreground"
+            className="mt-1 text-[15px] font-semibold text-foreground"
           >
             {Number(t.commission_rate)}%
           </div>
@@ -190,12 +190,12 @@ export function TalentDetail({ talent: t, analytics, viewerRole }) {
 function MiniStat({ label, value, sub }) {
   return (
     <div>
-      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         {label}
       </div>
       <div
         data-slot="numeric"
-        className="mt-2 font-serif text-[26px] font-light leading-none tracking-[-0.02em] text-foreground"
+        className="mt-2 text-[15px] font-semibold leading-none tracking-[-0.02em] text-foreground"
       >
         {value}
       </div>
@@ -209,7 +209,7 @@ function EditToggle({ editing, onStart, onCancel }) {
     <button
       type="button"
       onClick={onCancel}
-      className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+      className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
     >
       <X className="h-3 w-3" />
       Cancel
@@ -218,7 +218,7 @@ function EditToggle({ editing, onStart, onCancel }) {
     <button
       type="button"
       onClick={onStart}
-      className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+      className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
     >
       <Pencil className="h-3 w-3" />
       Edit
@@ -229,7 +229,7 @@ function EditToggle({ editing, onStart, onCancel }) {
 function SavedFlash({ show }) {
   if (!show) return null;
   return (
-    <span className="inline-flex items-center gap-1 text-[10.5px] uppercase tracking-[0.14em] text-success">
+    <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-success">
       <Check className="h-3 w-3" />
       Saved — reflected on the talent dashboard
     </span>
@@ -257,7 +257,7 @@ function ProfileSection({ talent: t }) {
   return (
     <section className="mt-10 border-b border-border/60 pb-10">
       <div className="flex items-baseline justify-between pb-3">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Profile &amp; contract
         </div>
         <div className="flex items-center gap-3">
@@ -273,7 +273,7 @@ function ProfileSection({ talent: t }) {
       {!editing ? (
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Contact
             </div>
             <ul className="mt-3 space-y-2 text-[12.5px]">
@@ -292,7 +292,7 @@ function ProfileSection({ talent: t }) {
             </ul>
           </div>
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Contract
             </div>
             <div className="mt-3 space-y-2 text-[12.5px]">
@@ -304,7 +304,7 @@ function ProfileSection({ talent: t }) {
               {daysToContractEnd !== null &&
                 daysToContractEnd <= 60 &&
                 daysToContractEnd > 0 && (
-                  <div className="inline-flex items-center gap-1 text-[10.5px] uppercase tracking-[0.14em] text-warning">
+                  <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-warning">
                     <Clock className="h-3 w-3" />
                     Renews in {daysToContractEnd}d
                   </div>
@@ -312,7 +312,7 @@ function ProfileSection({ talent: t }) {
             </div>
           </div>
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Placement
             </div>
             <div className="mt-3 space-y-2 text-[12.5px]">
@@ -474,7 +474,7 @@ function Row({ label, value, mono, serif }) {
       <span
         className={
           serif
-            ? "font-serif text-[18px] font-light text-foreground"
+            ? "text-[13.5px] font-medium text-foreground"
             : mono
               ? "font-mono text-[11px] text-foreground"
               : "text-foreground"
@@ -515,7 +515,7 @@ function MeasurementsSection({ talent: t }) {
   return (
     <section className="mt-10 border-b border-border/60 pb-10">
       <div className="flex items-baseline justify-between pb-3">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Measurements
         </div>
         <div className="flex items-center gap-3">
@@ -536,12 +536,12 @@ function MeasurementsSection({ talent: t }) {
                 <div className="col-span-1 font-mono text-[10px] text-muted-foreground/60">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <div className="col-span-5 text-[12.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                <div className="col-span-5 text-[12.5px] text-muted-foreground">
                   {label}
                 </div>
                 <div
                   data-slot="numeric"
-                  className="col-span-6 text-right font-serif text-[17px] font-light text-foreground"
+                  className="col-span-6 text-right text-[13.5px] font-medium text-foreground"
                 >
                   {m[col] ?? "—"}
                 </div>
@@ -642,12 +642,12 @@ function PortfolioSection({ talent: t }) {
                 className="aspect-[3/4] w-full object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-background/85 px-2 py-1.5 backdrop-blur-sm">
-                <span className="truncate text-[9.5px] uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="truncate text-[11.5px] font-medium text-muted-foreground">
                   {statusLabel(img.image_type)}
                 </span>
                 <span className="flex items-center gap-1">
                   {img.is_primary_polaroid ? (
-                    <span title="Primary polaroid" className="text-bronze">
+                    <span title="Primary polaroid" className="text-brand">
                       <Star className="h-3.5 w-3.5 fill-current" />
                     </span>
                   ) : (
@@ -656,7 +656,7 @@ function PortfolioSection({ talent: t }) {
                       disabled={busyId === img.id}
                       onClick={() => handleSetPrimary(img)}
                       title="Make primary polaroid"
-                      className="pressable text-muted-foreground transition-colors hover:text-bronze disabled:opacity-50"
+                      className="pressable text-muted-foreground transition-colors hover:text-brand disabled:opacity-50"
                     >
                       <Star className="h-3.5 w-3.5" />
                     </button>
@@ -736,7 +736,7 @@ function PortfolioStatusSection({ talent: t }) {
   return (
     <section className="mt-10 border-b border-border/60 pb-10">
       <div className="flex items-baseline justify-between pb-3">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Portfolio status
         </div>
         <div className="flex items-center gap-3">
@@ -752,27 +752,27 @@ function PortfolioStatusSection({ talent: t }) {
       {!editing ? (
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Comp card
             </div>
             <div
-              className={`mt-1 text-[12.5px] uppercase tracking-[0.1em] ${accentText(assetAccent(t.comp_card_status))}`}
+              className={`mt-1 text-[12.5px] ${accentText(assetAccent(t.comp_card_status))}`}
             >
               {statusLabel(t.comp_card_status)}
             </div>
           </div>
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Digitals
             </div>
             <div
-              className={`mt-1 text-[12.5px] uppercase tracking-[0.1em] ${accentText(assetAccent(t.digitals_status))}`}
+              className={`mt-1 text-[12.5px] ${accentText(assetAccent(t.digitals_status))}`}
             >
               {statusLabel(t.digitals_status)}
             </div>
           </div>
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Last test shoot
             </div>
             <div className="mt-1 font-mono text-[11px] text-foreground">
@@ -780,7 +780,7 @@ function PortfolioStatusSection({ talent: t }) {
             </div>
           </div>
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Next shoot
             </div>
             <div className="mt-1 font-mono text-[11px] text-foreground">
@@ -883,19 +883,19 @@ function AccountSection({ talent: t, viewerRole }) {
       ) : (
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Email
             </div>
             <div className="mt-1 truncate text-[12.5px] text-foreground">{account.email}</div>
           </div>
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Name on account
             </div>
             <div className="mt-1 text-[12.5px] text-foreground">{account.full_name}</div>
           </div>
           <div>
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Last login
             </div>
             <div className="mt-1 font-mono text-[11px] text-foreground">
@@ -903,7 +903,7 @@ function AccountSection({ talent: t, viewerRole }) {
             </div>
           </div>
           <div className="text-right md:text-left">
-            <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+            <div className="text-[11.5px] font-medium text-muted-foreground/70">
               Access
             </div>
             <div className="mt-1">
@@ -929,7 +929,7 @@ function AccountSection({ talent: t, viewerRole }) {
                 if (result?.error) setError(result.error);
               });
             }}
-            className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-destructive/40 px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-destructive transition-colors hover:bg-destructive/5 disabled:opacity-60"
+            className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-destructive/40 px-3 text-[11.5px] font-medium text-destructive transition-colors hover:bg-destructive/5 disabled:opacity-60"
           >
             {pendingDeactivate ? "Deactivating…" : "Deactivate talent"}
           </button>

@@ -15,7 +15,7 @@ export default async function NewBookingPage({ searchParams }) {
     <div>
       <Link
         href="/admin/bookings"
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to bookings
@@ -27,7 +27,7 @@ export default async function NewBookingPage({ searchParams }) {
           meta="New record"
           title={
             <>
-              New <span className="editorial-italic">booking</span>
+              New booking
             </>
           }
           lede="Creates the booking, logs the first status entry, and notifies the talent for confirmation."

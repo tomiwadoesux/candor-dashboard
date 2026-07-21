@@ -3,14 +3,13 @@ import { ArrowUpRight } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { adminDashboardMetrics } from "@/lib/queries/dashboard";
 import { dateShort, relativeTime, statusLabel } from "@/lib/format";
-import { Eyebrow, Stat, moneyList, bookingAccent, accentText } from "@/components/admin/kit";
-
-const QUICK_ACTIONS = [
-  { label: "Add talent", href: "/admin/talent/new" },
-  { label: "New booking", href: "/admin/bookings/new" },
-  { label: "Post a casting", href: "/admin/casting/new" },
-  { label: "Send a message", href: "/admin/communications" },
-];
+import {
+  Stat,
+  moneyList,
+  bookingAccent,
+  accentText,
+} from "@/components/admin/kit";
+import { QUICK_ACTIONS } from "@/components/admin/nav-config";
 
 export default async function AdminOverviewPage() {
   const profile = await requireRole("booker", "md", "ceo");
@@ -25,7 +24,7 @@ export default async function AdminOverviewPage() {
           {
             id: "escalated",
             accent: "destructive",
-            label: `Escalated — no response`,
+            label: "Escalated — no response",
             detail: `${metrics.escalatedCount} message${metrics.escalatedCount === 1 ? "" : "s"} past the 10-hour window`,
             href: "/admin/communications?tab=escalated",
           },
@@ -40,7 +39,7 @@ export default async function AdminOverviewPage() {
     })),
     ...metrics.castingDeadlines.map((c) => ({
       id: `casting-${c.id}`,
-      accent: "bronze",
+      accent: "brand",
       label: "Casting deadline",
       detail: `${c.title} · closes ${dateShort(c.deadline)}`,
       href: `/admin/casting/${c.id}`,
@@ -49,99 +48,84 @@ export default async function AdminOverviewPage() {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between pb-2">
-        <Eyebrow>
-          {today.toLocaleDateString("en-GB", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
-        </Eyebrow>
-        <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70">
-          {statusLabel(profile.role)} · Candor Management
+      <div className="flex items-end justify-between gap-4 pb-6">
+        <div>
+          <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            Good to see you, <span className="editorial-italic font-normal">{firstName}</span>
+          </h1>
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            {today.toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+            {" · "}
+            {alerts.length > 0
+              ? `${alerts.length} item${alerts.length === 1 ? "" : "s"} need your eye`
+              : "nothing waiting on you"}
+          </p>
         </div>
       </div>
-      <h1 className="font-serif text-[38px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
-        The <span className="editorial-italic">board</span>
-      </h1>
-      <p className="mt-2 max-w-[60ch] text-[13px] leading-relaxed text-muted-foreground">
-        Good to see you, {firstName}. {metrics.bookingsThisMonth} booking
-        {metrics.bookingsThisMonth === 1 ? "" : "s"} on the board this month,{" "}
-        {alerts.length} item{alerts.length === 1 ? "" : "s"} that need your eye.
-      </p>
 
-      <div className="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 border-y border-border/60 py-6 md:grid-cols-4">
-        <Stat
-          label="Active talent"
-          value={metrics.activeTalentCount}
-          sub="On the roster"
-          accent="success"
-        />
-        <Stat
-          label="Bookings · month"
-          value={metrics.bookingsThisMonth}
-          sub="Booked this calendar month"
-        />
-        <Stat
-          label="Revenue · YTD"
-          value={moneyList(metrics.revenueYtd, "—")}
-          sub="Gross across currencies"
-        />
+      <div className="grid grid-cols-2 gap-6 border-y border-border py-5 md:grid-cols-4">
+        <Stat label="Active talent" value={metrics.activeTalentCount} />
+        <Stat label="Bookings this month" value={metrics.bookingsThisMonth} />
+        <Stat label="Revenue YTD" value={moneyList(metrics.revenueYtd, "—")} />
         <Stat
           label="Pending payouts"
           value={moneyList(metrics.pendingPaymentsNet, "All clear")}
-          sub="Net owed to talent"
-          accent={Object.keys(metrics.pendingPaymentsNet || {}).length ? "warning" : null}
+          accent={
+            Object.keys(metrics.pendingPaymentsNet || {}).length ? "warning" : null
+          }
         />
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-12">
+      <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-12">
         <section className="lg:col-span-7">
-          <div className="flex items-baseline justify-between border-b border-border/60 pb-2">
-            <h2 className="font-serif text-[22px] font-light text-foreground">
-              <span className="editorial-italic">Wire</span> · recent activity
-            </h2>
+          <div className="flex items-baseline justify-between border-b border-border pb-2.5">
+            <h2 className="text-[13px] font-medium text-foreground">Recent activity</h2>
             <Link
               href="/admin/bookings"
-              className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className="text-[12px] font-medium text-brand transition-colors hover:text-brand-hover"
             >
-              All bookings <ArrowUpRight className="h-3 w-3" />
+              All bookings
             </Link>
           </div>
-          <ul className="mt-4 divide-y divide-border/60">
+          <ul className="divide-y divide-border/60">
             {metrics.recentActivity.length === 0 && (
-              <li className="py-8 text-center text-[12px] text-muted-foreground">
-                No activity yet — the wire lights up once bookings start moving.
+              <li className="py-8 text-center text-[12.5px] text-muted-foreground">
+                No activity yet — this lights up once bookings start moving.
               </li>
             )}
             {metrics.recentActivity.map((a) => (
               <li key={a.id}>
                 <Link
                   href={a.booking ? `/admin/bookings/${a.booking.id}` : "/admin/bookings"}
-                  className="group grid grid-cols-12 items-baseline gap-4 py-3 transition-colors hover:bg-muted/30"
+                  className="hover-reveal group flex items-center gap-4 rounded-md px-2 py-3"
                 >
-                  <span className="col-span-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60">
-                    {relativeTime(a.created_at)}
-                  </span>
-                  <div className="col-span-7 min-w-0">
-                    <div className="truncate text-[13px] text-foreground">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[13px] font-medium text-foreground">
                       {a.booking?.project_title || "Booking"}
                       {a.booking?.talent && (
-                        <span className="text-muted-foreground">
+                        <span className="font-normal text-muted-foreground">
                           {" "}
                           · {a.booking.talent.first_name} {a.booking.talent.last_name}
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <div className="mt-0.5 text-[12px] text-muted-foreground">
                       {a.old_status ? `${statusLabel(a.old_status)} → ` : ""}
-                      <span className={accentText(bookingAccent(a.new_status))}>
+                      <span className={`font-medium ${accentText(bookingAccent(a.new_status))}`}>
                         {statusLabel(a.new_status)}
+                      </span>
+                      <span className="text-muted-foreground/60">
+                        {" "}
+                        · {a.changed_by?.full_name || "System"}
                       </span>
                     </div>
                   </div>
-                  <span className="col-span-3 truncate text-right text-[11.5px] text-muted-foreground">
-                    {a.changed_by?.full_name || "System"}
+                  <span className="shrink-0 font-mono text-[11px] text-muted-foreground/60">
+                    {relativeTime(a.created_at)}
                   </span>
                 </Link>
               </li>
@@ -150,73 +134,59 @@ export default async function AdminOverviewPage() {
         </section>
 
         <aside className="lg:col-span-5">
-          <div className="flex items-baseline justify-between border-b border-border/60 pb-2">
-            <h2 className="font-serif text-[22px] font-light text-foreground">
-              <span className="editorial-italic">Needs you</span>
-            </h2>
-            <span data-slot="numeric" className="font-mono text-[10px] text-muted-foreground/70">
-              {alerts.length} item{alerts.length === 1 ? "" : "s"}
+          <div className="flex items-baseline justify-between border-b border-border pb-2.5">
+            <h2 className="text-[13px] font-medium text-foreground">Needs you</h2>
+            <span data-slot="numeric" className="text-[12px] text-muted-foreground">
+              {alerts.length}
             </span>
           </div>
-          <ul className="mt-3 divide-y divide-border/60">
+          <ul className="divide-y divide-border/60">
             {alerts.length === 0 && (
-              <li className="py-6 text-center text-[12px] text-muted-foreground">
-                Queue is empty — nothing waiting on you.
+              <li className="py-8 text-center text-[12.5px] text-muted-foreground">
+                Queue is empty.
               </li>
             )}
             {alerts.map((p) => (
               <li key={p.id}>
                 <Link
                   href={p.href}
-                  className="group relative flex items-start gap-3 py-3 pl-3 pr-2 transition-colors hover:bg-muted/40"
+                  className="hover-reveal group relative flex items-start gap-3 rounded-md py-3 pl-3 pr-2"
                 >
                   <span
-                    className={`absolute left-0 top-3 h-10 w-[2px] ${
+                    className={`absolute left-0 top-1/2 h-8 w-[2.5px] -translate-y-1/2 rounded-full ${
                       p.accent === "destructive"
                         ? "bg-destructive"
                         : p.accent === "warning"
                           ? "bg-warning"
-                          : "bg-bronze"
+                          : "bg-brand"
                     }`}
                   />
                   <div className="min-w-0 flex-1">
-                    <div
-                      className={`flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] ${accentText(p.accent)}`}
-                    >
+                    <div className={`text-[11.5px] font-medium ${accentText(p.accent)}`}>
                       {p.label}
                     </div>
-                    <div className="mt-1 truncate font-serif text-[15px] font-light text-foreground">
+                    <div className="mt-0.5 truncate text-[13px] font-medium text-foreground">
                       {p.detail}
                     </div>
                   </div>
-                  <ArrowUpRight className="mt-1 h-3 w-3 shrink-0 text-muted-foreground/40 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  <ArrowUpRight className="mt-1 h-3 w-3 shrink-0 text-muted-foreground/40 transition-[transform,color] duration-200 ease-[var(--ease-out)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
                 </Link>
               </li>
             ))}
           </ul>
 
-          <div className="mt-8 rounded-sm border border-border/60 bg-muted/30 p-4">
-            <Eyebrow>Quick actions</Eyebrow>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {QUICK_ACTIONS.map((q) => (
-                <Link
-                  key={q.href}
-                  href={q.href}
-                  className="pressable inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-                >
-                  {q.label}
-                  <ArrowUpRight className="h-3 w-3" />
-                </Link>
-              ))}
-            </div>
+          <div className="mt-6 flex flex-wrap gap-1.5">
+            {QUICK_ACTIONS.map((q) => (
+              <Link
+                key={q.href}
+                href={q.href}
+                className="pressable inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
+              >
+                {q.title}
+              </Link>
+            ))}
           </div>
         </aside>
-      </div>
-
-      <div className="mt-20 border-t border-border pt-6">
-        <p className="font-serif text-[12.5px] italic text-muted-foreground">
-          Candor Management Agency · Lagos · London · USA
-        </p>
       </div>
     </div>
   );

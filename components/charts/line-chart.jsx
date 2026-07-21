@@ -113,14 +113,13 @@ export function LineChart({
                 y2={padT + innerH * (1 - g)}
                 stroke="currentColor"
                 strokeWidth="1"
-                className="text-border/60"
-                strokeDasharray={g === 0 ? "0" : "2 4"}
+                className={g === 0 ? "text-border" : "text-border/50"}
               />
               <text
                 x={padL - 8}
                 y={padT + innerH * (1 - g) + 3}
                 textAnchor="end"
-                className="fill-muted-foreground font-mono text-[9px]"
+                className="fill-muted-foreground font-mono text-[10px]"
               >
                 {formatValue(Math.round(max * g))}
               </text>
@@ -137,7 +136,7 @@ export function LineChart({
               x={xFor(i)}
               y={height - 8}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[9.5px] uppercase tracking-[0.1em]"
+              className="fill-muted-foreground font-mono text-[10px]"
             >
               {d.label}
             </text>
@@ -165,14 +164,14 @@ export function LineChart({
                 d={path}
                 fill="none"
                 stroke={s.color}
-                strokeWidth="1.75"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 pathLength="1"
                 strokeDasharray="1"
                 strokeDashoffset="1"
                 style={{
-                  animation: "chart-draw 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
+                  animation: "chart-draw 800ms cubic-bezier(0.23, 1, 0.32, 1) forwards",
                 }}
               />
               {pts.map((p, i) => (
@@ -180,11 +179,11 @@ export function LineChart({
                   key={i}
                   cx={p.x}
                   cy={p.y}
-                  r={hover === i ? 3.5 : 0}
-                  fill="var(--background)"
+                  r={hover === i ? 4 : 0}
+                  fill="var(--surface)"
                   stroke={s.color}
-                  strokeWidth="1.5"
-                  className="transition-all duration-150"
+                  strokeWidth="2"
+                  className="transition-[r] duration-150"
                 />
               ))}
             </g>
@@ -210,12 +209,12 @@ export function LineChart({
 
       {hover !== null && (
         <div
-          className="pointer-events-none absolute top-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-[11px] shadow-[var(--shadow-lift)]"
+          className="pointer-events-none absolute top-2 rounded-lg border border-border bg-popover px-2.5 py-1.5 text-[11.5px] shadow-[var(--shadow-lift)]"
           style={{
             left: Math.min(w - 160, Math.max(0, xFor(hover) - 70)),
           }}
         >
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="font-mono text-[10.5px] text-muted-foreground">
             {data[hover].label}
           </div>
           {series.map((s, si) => (
@@ -225,7 +224,7 @@ export function LineChart({
                 style={{ backgroundColor: s.color }}
               />
               <span className="text-muted-foreground">{s.label}</span>
-              <span className="ml-auto font-mono text-foreground">
+              <span className="ml-auto pl-3 font-mono text-foreground" data-slot="numeric">
                 {formatValue(data[hover].values[si])}
               </span>
             </div>
@@ -237,6 +236,11 @@ export function LineChart({
         @keyframes chart-draw {
           to {
             stroke-dashoffset: 0;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          path {
+            animation-duration: 1ms !important;
           }
         }
       `}</style>

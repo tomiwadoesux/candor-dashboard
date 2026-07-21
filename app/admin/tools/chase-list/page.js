@@ -29,7 +29,7 @@ export default async function ChaseListPage() {
         meta={`${payments.length} invoice${payments.length === 1 ? "" : "s"} awaiting payment`}
         title={
           <>
-            The chase <span className="editorial-italic">list</span>
+            The chase list
           </>
         }
         lede="Every invoice still awaiting the client, aged against their payment terms — with a ready-to-send reminder drafted for anything past due."

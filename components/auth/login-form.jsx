@@ -41,7 +41,7 @@ export function LoginForm({ next, resetDone }) {
           </label>
           <Link
             href="/forgot-password"
-            className="text-xs text-muted-foreground transition-colors hover:text-accent-foreground"
+            className="text-xs font-medium text-brand transition-colors hover:text-brand-hover"
           >
             Forgot password?
           </Link>
@@ -62,7 +62,8 @@ export function LoginForm({ next, resetDone }) {
       <Button
         type="submit"
         size="lg"
-        className="pressable w-full"
+        variant="brand"
+        className="w-full"
         disabled={pending}
       >
         {pending ? "Signing in…" : "Sign in"}

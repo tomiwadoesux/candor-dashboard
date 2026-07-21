@@ -65,7 +65,7 @@ export function PackageCreateForm({ talent, siteUrl }) {
       </div>
 
       <div className="mt-5">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
+        <p className="text-[11.5px] font-medium text-muted-foreground/70">
           Select talent · {selected.length} chosen
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -160,7 +160,7 @@ export function PackageList({ packages, siteUrl, canDelete }) {
               <div className="flex items-center gap-2">
                 <h3 className="truncate text-sm font-semibold text-foreground">{p.title}</h3>
                 {p.expired ? (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground">
                     Expired
                   </span>
                 ) : null}

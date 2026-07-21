@@ -30,11 +30,15 @@ export default async function PackagePage({ params }) {
   return (
     <main className="min-h-dvh bg-background px-6 pb-24 text-foreground">
       <header className="mx-auto max-w-5xl pt-14 text-center">
-        <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-muted-foreground">
-          Lagos · London · USA
-        </p>
-        <p className="font-serif mt-3 text-4xl tracking-[0.08em]">CANDOR</p>
-        <h1 className="mt-10 text-3xl leading-tight sm:text-4xl">
+        <div className="inline-flex flex-col items-center">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-[16px] font-semibold text-brand-foreground">
+            C
+          </span>
+          <p className="mt-2.5 text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
+            Candor · Lagos · London · USA
+          </p>
+        </div>
+        <h1 className="mt-10 font-serif text-4xl font-light leading-tight tracking-[-0.01em] sm:text-5xl">
           {pkg.title}
         </h1>
         {pkg.client_name ? (
@@ -112,7 +116,7 @@ export default async function PackagePage({ params }) {
           To book any of this talent, reply to your Candor contact or write to{" "}
           <a
             href="mailto:contact@candor-management.com"
-            className="text-accent-foreground hover:underline"
+            className="font-medium text-brand transition-colors hover:text-brand-hover"
           >
             contact@candor-management.com
           </a>

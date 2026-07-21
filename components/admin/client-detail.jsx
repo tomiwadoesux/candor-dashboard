@@ -28,7 +28,7 @@ export function ClientDetail({ client: c }) {
   return (
     <div>
       <div className="mt-6 flex items-baseline justify-between pb-2">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Clients · {statusLabel(c.client_type)}
         </div>
         <div className="font-mono text-[11px] text-muted-foreground">
@@ -38,8 +38,8 @@ export function ClientDetail({ client: c }) {
 
       <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-8">
         <div className="min-w-0">
-          <h1 className="font-serif text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
-            <span className="editorial-italic">{c.company_name}</span>
+          <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            <span>{c.company_name}</span>
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11.5px] text-muted-foreground">
             {c.contact_person && <span>{c.contact_person}</span>}
@@ -73,7 +73,7 @@ export function ClientDetail({ client: c }) {
             <button
               type="button"
               onClick={() => setEditing((v) => !v)}
-              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             >
               {editing ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
               {editing ? "Cancel" : "Edit"}
@@ -88,7 +88,7 @@ export function ClientDetail({ client: c }) {
                   if (result?.error) setToggleError(result.error);
                 });
               }}
-              className="pressable inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-60"
+              className="pressable inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-60"
             >
               {togglePending ? "Saving…" : c.is_active ? "Deactivate" : "Reactivate"}
             </button>
@@ -103,7 +103,7 @@ export function ClientDetail({ client: c }) {
           className="mt-8 space-y-4 rounded-sm border border-border/60 bg-muted/20 p-5"
         >
           <input type="hidden" name="id" value={c.id} />
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Edit client
           </div>
           <FormError error={state?.error} />
@@ -165,7 +165,7 @@ export function ClientDetail({ client: c }) {
 
       <section className="mt-10">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Money · per currency
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -180,11 +180,11 @@ export function ClientDetail({ client: c }) {
           <ul className="divide-y divide-border/60 border-y border-border/60">
             {totals.map(([cur, tot]) => (
               <li key={cur} className="grid grid-cols-12 items-baseline gap-x-4 py-4">
-                <div className="col-span-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                <div className="col-span-2 font-mono text-[11.5px] font-medium text-muted-foreground">
                   {cur}
                 </div>
                 <MoneyCell label="Gross" value={money(tot.gross, cur)} />
-                <MoneyCell label="Commission" value={money(tot.commission, cur)} accent="text-bronze" />
+                <MoneyCell label="Commission" value={money(tot.commission, cur)} accent="text-brand" />
                 <MoneyCell label="Net to talent" value={money(tot.net, cur)} />
                 <MoneyCell
                   label="Outstanding"
@@ -199,7 +199,7 @@ export function ClientDetail({ client: c }) {
 
       <section className="mt-10">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Bookings
           </div>
           <span data-slot="numeric" className="font-mono text-[10px] text-muted-foreground/70">
@@ -220,17 +220,17 @@ export function ClientDetail({ client: c }) {
                   {dateShort(b.booking_date)}
                 </div>
                 <div className="col-span-4 min-w-0">
-                  <h3 className="truncate font-serif text-[17px] font-light text-foreground">
+                  <h3 className="truncate text-[13.5px] font-medium text-foreground">
                     {b.project_title}
                   </h3>
-                  <div className="mt-0.5 text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/80">
+                  <div className="mt-0.5 text-[11.5px] font-medium text-muted-foreground/80">
                     {b.service_type || "—"}
                     {b.talent && ` · ${b.talent.first_name} ${b.talent.last_name}`}
                   </div>
                 </div>
                 <div
                   data-slot="numeric"
-                  className="col-span-2 text-right font-serif text-[16px] font-light text-foreground"
+                  className="col-span-2 text-right text-[13.5px] font-medium text-foreground"
                 >
                   {money(b.talent_fee, b.fee_currency)}
                 </div>
@@ -261,10 +261,10 @@ export function ClientDetail({ client: c }) {
 function MoneyCell({ label, value, accent = "text-foreground" }) {
   return (
     <div className="col-span-2 text-right md:col-span-2">
-      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         {label}
       </div>
-      <div data-slot="numeric" className={`mt-0.5 font-serif text-[17px] font-light ${accent}`}>
+      <div data-slot="numeric" className={`mt-0.5 text-[13.5px] font-medium ${accent}`}>
         {value}
       </div>
     </div>

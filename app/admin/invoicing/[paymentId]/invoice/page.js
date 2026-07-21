@@ -25,7 +25,7 @@ const SHEET_CSS = `
   --muted-foreground: oklch(0.49 0.015 70);
   --border: oklch(0.9 0.01 80);
   --border-strong: oklch(0.848 0.012 80);
-  --bronze: oklch(0.55 0.115 60);
+  --brand: oklch(0.55 0.115 60);
   --success: oklch(0.55 0.12 150);
   --warning: oklch(0.7 0.13 80);
   --destructive: oklch(0.5 0.17 25);
@@ -49,7 +49,7 @@ const SHEET_CSS = `
 
 function SheetLabel({ children }) {
   return (
-    <div className="text-[9.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
+    <div className="text-[11.5px] font-medium text-muted-foreground/80">
       {children}
     </div>
   );
@@ -59,10 +59,10 @@ function Masthead({ docLabel, number, issued }) {
   return (
     <div className="flex items-start justify-between border-b border-border pb-7">
       <div>
-        <div className="font-serif text-[30px] font-light leading-none tracking-[0.3em] text-foreground">
+        <div className="text-[22px] font-semibold tracking-[-0.02em] leading-none tracking-[0.3em] text-foreground">
           CANDOR
         </div>
-        <div className="mt-2 text-[9.5px] uppercase tracking-[0.24em] text-muted-foreground">
+        <div className="mt-2 text-[11.5px] font-medium text-muted-foreground">
           Talent Management · Lagos · London · USA
         </div>
       </div>
@@ -83,7 +83,7 @@ function SheetFooter() {
       <div className="editorial-italic text-[13px] text-muted-foreground">
         With thanks, from all of us at Candor
       </div>
-      <div className="mt-1.5 text-[9.5px] uppercase tracking-[0.2em] text-muted-foreground/80">
+      <div className="mt-1.5 text-[11.5px] font-medium text-muted-foreground/80">
         Candor Management Agency · contact@candor-management.com
       </div>
     </div>
@@ -111,7 +111,7 @@ function ClientInvoiceBody({ payment: p }) {
       <div className="mt-9 grid grid-cols-2 gap-x-10">
         <div>
           <SheetLabel>Billed to</SheetLabel>
-          <div className="mt-2 font-serif text-[19px] font-light text-foreground">
+          <div className="mt-2 text-[13.5px] font-medium text-foreground">
             {client?.company_name || "Client"}
           </div>
           <div className="mt-1 space-y-0.5 text-[11.5px] leading-relaxed text-muted-foreground">
@@ -127,7 +127,7 @@ function ClientInvoiceBody({ payment: p }) {
             Payment due {dateShort(dueDate)}
           </div>
           {client?.client_type && (
-            <div className="mt-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80">
+            <div className="mt-3 text-[11.5px] font-medium text-muted-foreground/80">
               {statusLabel(client.client_type)} client
             </div>
           )}
@@ -145,7 +145,7 @@ function ClientInvoiceBody({ payment: p }) {
         </div>
         <div className="grid grid-cols-12 items-baseline gap-x-4 border-b border-border py-5">
           <div className="col-span-9">
-            <div className="font-serif text-[17px] font-light text-foreground">
+            <div className="text-[13.5px] font-medium text-foreground">
               {p.booking?.project_title || "Talent booking"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
@@ -169,12 +169,12 @@ function ClientInvoiceBody({ payment: p }) {
           </div>
         </div>
         <div className="grid grid-cols-12 items-baseline gap-x-4 py-4">
-          <div className="col-span-9 text-right text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="col-span-9 text-right text-[11.5px] font-medium text-muted-foreground">
             Total due
           </div>
           <div
             data-slot="numeric"
-            className="col-span-3 text-right font-serif text-[24px] font-light text-foreground"
+            className="col-span-3 text-right text-[15px] font-semibold text-foreground"
           >
             {money(p.gross_fee, p.currency)}
           </div>
@@ -198,7 +198,7 @@ function RemittanceRow({ label, sub, value, strong }) {
         <div
           className={
             strong
-              ? "text-[12px] font-medium uppercase tracking-[0.14em] text-foreground"
+              ? "text-[12px] font-medium text-foreground"
               : "text-[12.5px] text-foreground"
           }
         >
@@ -210,7 +210,7 @@ function RemittanceRow({ label, sub, value, strong }) {
         data-slot="numeric"
         className={`col-span-4 text-right ${
           strong
-            ? "font-serif text-[24px] font-light text-foreground"
+            ? "text-[15px] font-semibold text-foreground"
             : "font-mono text-[13px] text-muted-foreground"
         }`}
       >
@@ -234,7 +234,7 @@ function RemittanceBody({ payment: p }) {
       <div className="mt-9 grid grid-cols-2 gap-x-10">
         <div>
           <SheetLabel>Prepared for</SheetLabel>
-          <div className="mt-2 font-serif text-[19px] font-light text-foreground">
+          <div className="mt-2 text-[13.5px] font-medium text-foreground">
             {p.talent ? `${p.talent.first_name} ${p.talent.last_name}` : "Talent"}
           </div>
           <div className="mt-1 text-[11.5px] text-muted-foreground">
@@ -315,7 +315,7 @@ export default async function InvoiceStudioPage({ params, searchParams }) {
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Link
           href="/admin/invoicing"
-          className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3 w-3" />
           Back to invoicing

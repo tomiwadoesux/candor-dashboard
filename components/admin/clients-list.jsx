@@ -66,7 +66,7 @@ export function ClientsList({ clients, q = "", type = "" }) {
           />
           <button
             type="submit"
-            className="pressable text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+            className="pressable text-[11.5px] font-medium text-muted-foreground hover:text-foreground"
           >
             Go
           </button>
@@ -74,7 +74,7 @@ export function ClientsList({ clients, q = "", type = "" }) {
         <button
           type="button"
           onClick={() => setShowCreate((v) => !v)}
-          className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[11px] font-medium uppercase tracking-[0.14em] text-background"
+          className="pressable inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
         >
           {showCreate ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
           {showCreate ? "Close" : "Add client"}
@@ -95,10 +95,10 @@ export function ClientsList({ clients, q = "", type = "" }) {
               </div>
               <div className="col-span-5 min-w-0">
                 <div className="flex items-baseline gap-3">
-                  <h3 className="truncate font-serif text-[20px] font-light text-foreground">
+                  <h3 className="truncate text-[15px] font-semibold text-foreground">
                     {c.company_name}
                   </h3>
-                  <span className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="shrink-0 text-[11.5px] font-medium text-muted-foreground">
                     {statusLabel(c.client_type)}
                   </span>
                 </div>
@@ -121,7 +121,7 @@ export function ClientsList({ clients, q = "", type = "" }) {
                 </div>
               </div>
               <div className="col-span-2">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Terms
                 </div>
                 <div className="mt-0.5 text-[12px] text-foreground">
@@ -129,12 +129,12 @@ export function ClientsList({ clients, q = "", type = "" }) {
                 </div>
               </div>
               <div className="col-span-2 text-right">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Bookings
                 </div>
                 <div
                   data-slot="numeric"
-                  className="mt-0.5 font-serif text-[22px] font-light leading-none text-foreground"
+                  className="mt-0.5 text-[15px] font-semibold leading-none text-foreground"
                 >
                   {c.bookingsCount ?? 0}
                 </div>
@@ -172,7 +172,7 @@ function CreateClientForm({ onDone }) {
       action={action}
       className="mt-5 space-y-4 rounded-sm border border-border/60 bg-muted/20 p-5"
     >
-      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         New client
       </div>
       <FormError error={state?.error} />

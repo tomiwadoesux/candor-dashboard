@@ -11,7 +11,7 @@ export default async function BriefParserPage() {
     <div>
       <Link
         href="/admin/tools"
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to tools
@@ -23,7 +23,7 @@ export default async function BriefParserPage() {
           meta="Brief parser"
           title={
             <>
-              Parse a <span className="editorial-italic">brief</span>
+              Parse a brief
             </>
           }
           lede="Paste a client's messy email or WhatsApp brief. The AI extracts structured casting or booking fields you can review, edit, and turn into a record in one click."

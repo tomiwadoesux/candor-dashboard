@@ -3,6 +3,7 @@
 import { Clock, MapPin } from "lucide-react";
 import { dateShort, statusLabel, timeShort } from "@/lib/format";
 import { bookingTone } from "@/components/talent/status-tones";
+import { SectionHead } from "@/components/talent/kit";
 
 const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -32,15 +33,13 @@ export function CalendarView({ year, month, bookings, todayISO }) {
   return (
     <div>
       {statusesPresent.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pb-5 text-[10.5px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4 text-[11.5px] text-muted-foreground">
           {statusesPresent.map((s) => {
             const tone = bookingTone(s);
             return (
               <span key={s} className="inline-flex items-center gap-1.5">
                 <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
-                <span className="uppercase tracking-[0.12em]">
-                  {statusLabel(s)}
-                </span>
+                {statusLabel(s)}
               </span>
             );
           })}
@@ -49,17 +48,17 @@ export function CalendarView({ year, month, bookings, todayISO }) {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         <div className="lg:col-span-8">
-          <div className="grid grid-cols-7 border-b border-border/60 pb-2 text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground/60">
+          <div className="grid grid-cols-7 pb-2 text-[11px] font-medium text-muted-foreground/70">
             {WEEK.map((w) => (
-              <div key={w} className="text-center font-medium">
+              <div key={w} className="text-center">
                 {w}
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 overflow-hidden rounded-sm border border-border/50 [&>*]:border-b [&>*]:border-r [&>*]:border-border/40 [&>*:nth-child(7n)]:border-r-0">
+          <div className="grid grid-cols-7 overflow-hidden rounded-xl border border-border bg-card [&>*]:border-b [&>*]:border-r [&>*]:border-border/50 [&>*:nth-child(7n)]:border-r-0">
             {cells.map((iso, i) => {
               if (!iso) {
-                return <div key={`e${i}`} className="min-h-[104px] bg-muted/15" />;
+                return <div key={`e${i}`} className="min-h-[96px] bg-surface-muted/40" />;
               }
               const dayEvents = eventsOn(bookings, iso);
               const isToday = iso === todayISO;
@@ -70,50 +69,43 @@ export function CalendarView({ year, month, bookings, todayISO }) {
               return (
                 <div
                   key={iso}
-                  className={`relative min-h-[104px] p-2.5 ${
-                    isToday
-                      ? "bg-bronze/[0.06]"
-                      : isWeekend
-                        ? "bg-muted/20"
-                        : ""
+                  className={`relative min-h-[96px] p-2 ${
+                    isWeekend && !isToday ? "bg-surface-muted/40" : ""
                   }`}
                 >
-                  <div className="flex items-baseline justify-between">
-                    <span
-                      className={`font-serif leading-none ${
-                        isToday ? "text-[24px] font-light" : "text-[16px] font-light"
-                      } ${isPast && !isToday ? "text-muted-foreground/50" : "text-foreground"}`}
-                    >
-                      {Number(iso.slice(-2))}
-                    </span>
-                    {isToday && (
-                      <span className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-bronze">
-                        Today
-                      </span>
-                    )}
-                  </div>
+                  <span
+                    data-slot="numeric"
+                    className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] ${
+                      isToday
+                        ? "bg-brand font-medium text-brand-foreground"
+                        : isPast
+                          ? "text-muted-foreground/50"
+                          : "text-foreground"
+                    }`}
+                  >
+                    {Number(iso.slice(-2))}
+                  </span>
 
                   {dayEvents.length > 0 && (
-                    <div className="mt-2 space-y-1">
+                    <div className="mt-1.5 space-y-1">
                       {dayEvents.slice(0, 2).map((b) => {
                         const tone = bookingTone(b.status);
                         return (
                           <div
                             key={b.id}
-                            className={`flex items-center gap-1 overflow-hidden rounded-[3px] px-1.5 py-1 text-[10px] leading-tight ${tone.tint} ring-1 ${tone.ring} ring-inset`}
+                            className={`flex items-center gap-1.5 overflow-hidden rounded-md px-1.5 py-1 text-[10.5px] leading-tight ${tone.tint}`}
                           >
                             <span
-                              className={`w-[2px] self-stretch rounded-sm ${tone.dot}`}
-                              style={{ minHeight: 10 }}
+                              className={`h-2.5 w-[2px] shrink-0 rounded-full ${tone.dot}`}
                             />
-                            <span className="truncate font-medium text-foreground/85">
+                            <span className="truncate font-medium text-foreground/90">
                               {b.project_title}
                             </span>
                           </div>
                         );
                       })}
                       {dayEvents.length > 2 && (
-                        <div className="pl-1 font-mono text-[9px] text-muted-foreground/60">
+                        <div className="pl-1 text-[10px] text-muted-foreground/60">
                           +{dayEvents.length - 2} more
                         </div>
                       )}
@@ -126,22 +118,13 @@ export function CalendarView({ year, month, bookings, todayISO }) {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="flex items-baseline justify-between border-b border-border/60 pb-2">
-            <h4 className="font-serif text-[16px] font-light text-foreground">
-              <span className="editorial-italic">This month</span>
-            </h4>
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground/60">
-              Chronological
-            </span>
-          </div>
-          <ul className="mt-2 divide-y divide-border/40">
+          <SectionHead title="This month" className="border-b border-border pb-2.5" />
+          <ul className="divide-y divide-border/50">
             {bookings.length === 0 ? (
               <li className="py-8 text-center">
-                <p className="font-serif text-[14px] italic text-muted-foreground">
-                  A quiet month.
-                </p>
-                <p className="mt-1 text-[11px] text-muted-foreground/70">
-                  No bookings yet — your booker will confirm your first job soon.
+                <p className="text-[13px] font-medium text-foreground">A quiet month</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  Nothing booked yet.
                 </p>
               </li>
             ) : (
@@ -150,26 +133,26 @@ export function CalendarView({ year, month, bookings, todayISO }) {
                 const d = new Date(`${b.booking_date}T00:00:00`);
                 return (
                   <li key={b.id} className="flex items-start gap-3 py-3">
-                    <div className="w-12 shrink-0 text-center">
-                      <div className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-muted-foreground/60">
-                        {d.toLocaleString("en-GB", { month: "short" })}
-                      </div>
+                    <div className="w-11 shrink-0 text-center">
                       <div
                         data-slot="numeric"
-                        className="font-serif text-[22px] font-light leading-none text-foreground"
+                        className="text-[16px] font-medium leading-none text-foreground"
                       >
                         {d.getDate()}
                       </div>
+                      <div className="mt-0.5 text-[10px] font-medium uppercase text-muted-foreground/60">
+                        {d.toLocaleString("en-GB", { month: "short" })}
+                      </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.14em]">
-                        <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
-                        <span className={tone.text}>{statusLabel(b.status)}</span>
-                      </div>
-                      <div className="mt-0.5 truncate font-serif text-[14px] font-light text-foreground">
+                      <div className="truncate text-[13px] font-medium text-foreground">
                         {b.project_title}
                       </div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10.5px] text-muted-foreground">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11.5px] text-muted-foreground">
+                        <span className={`inline-flex items-center gap-1 font-medium ${tone.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
+                          {statusLabel(b.status)}
+                        </span>
                         <span className="inline-flex items-center gap-1">
                           <MapPin className="h-2.5 w-2.5" />
                           {statusLabel(b.location_city)}
@@ -177,7 +160,7 @@ export function CalendarView({ year, month, bookings, todayISO }) {
                         {b.call_time && (
                           <span className="inline-flex items-center gap-1">
                             <Clock className="h-2.5 w-2.5" />
-                            Call {timeShort(b.call_time)}
+                            {timeShort(b.call_time)}
                           </span>
                         )}
                         {b.booking_end_date &&

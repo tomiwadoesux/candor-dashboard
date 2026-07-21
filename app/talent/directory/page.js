@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { talentDirectory } from "@/lib/queries/community";
 import { statusLabel } from "@/lib/format";
 import { DirectoryGrid } from "@/components/talent/directory/grid";
+import { PageHeader } from "@/components/talent/kit";
 
 const CATEGORIES = [
   "model",
@@ -40,26 +41,12 @@ export default async function DirectoryPage({ searchParams }) {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between pb-2 pt-2">
-        <div className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-          Profile · Roster
-        </div>
-        <div className="text-[11px] text-muted-foreground">
-          {roster.length} represented
-        </div>
-      </div>
-      <h2 className="font-serif text-[34px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
-        <span className="editorial-italic">Directory</span>
-      </h2>
-      <p className="mt-2 max-w-[56ch] text-[13px] leading-relaxed text-muted-foreground">
-        The Candor roster. Instagram is shown — direct contact always routes
-        through us.
-      </p>
+      <PageHeader title="Directory" meta={`${roster.length} represented`} />
 
-      <div className="mt-10 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <form
           action="/talent/directory"
-          className="relative flex h-9 min-w-[220px] flex-1 items-center gap-2 rounded-full border border-border bg-surface-muted px-3 transition-colors focus-within:border-border-strong focus-within:bg-surface"
+          className="relative flex h-9 min-w-[220px] flex-1 items-center gap-2 rounded-lg border border-input bg-surface px-3 transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)] focus-within:border-brand/60 focus-within:ring-2 focus-within:ring-ring"
         >
           {category && <input type="hidden" name="category" value={category} />}
           <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -67,7 +54,7 @@ export default async function DirectoryPage({ searchParams }) {
             name="q"
             defaultValue={q}
             placeholder="Search the roster…"
-            className="h-full flex-1 bg-transparent text-[12.5px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            className="h-full flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
           />
         </form>
 
@@ -83,7 +70,7 @@ export default async function DirectoryPage({ searchParams }) {
         </div>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-8">
         <DirectoryGrid roster={roster} q={q} />
       </div>
     </div>

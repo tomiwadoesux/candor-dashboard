@@ -57,7 +57,7 @@ export function CastingDetail({ casting: c }) {
   return (
     <div>
       <div className="mt-6 flex items-baseline justify-between pb-2">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           Casting · {statusLabel(c.category)}
         </div>
         <div className="font-mono text-[11px] text-muted-foreground">
@@ -67,8 +67,8 @@ export function CastingDetail({ casting: c }) {
 
       <div className="grid grid-cols-12 items-start gap-x-6 border-b border-border/60 pb-8">
         <div className="col-span-8 min-w-0">
-          <h1 className="font-serif text-[38px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
-            <span className="editorial-italic">{c.title}</span>
+          <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            <span>{c.title}</span>
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11.5px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
@@ -90,12 +90,12 @@ export function CastingDetail({ casting: c }) {
             </p>
           )}
           {c.requirements && (
-            <p className="mt-2 max-w-[68ch] border-l border-border/60 pl-4 font-serif text-[13.5px] font-light italic leading-relaxed text-muted-foreground">
+            <p className="mt-2 max-w-[68ch] border-l border-border/60 pl-4 text-[12.5px] leading-relaxed text-muted-foreground">
               {c.requirements}
             </p>
           )}
           {(c.brand_name_internal || c.client) && (
-            <div className="mt-4 inline-flex items-center gap-1.5 rounded-sm bg-warning/10 px-2 py-1 text-[10.5px] uppercase tracking-[0.12em] text-warning">
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-sm bg-warning/10 px-2 py-1 text-[11.5px] font-medium text-warning">
               <Lock className="h-3 w-3" />
               Internal · {c.brand_name_internal || c.client?.company_name}
               {c.brand_name_internal && c.client ? ` (${c.client.company_name})` : ""}
@@ -107,12 +107,12 @@ export function CastingDetail({ casting: c }) {
           <div>
             <div
               data-slot="numeric"
-              className="font-serif text-[30px] font-light leading-none text-foreground"
+              className="text-[22px] font-semibold tracking-[-0.02em] leading-none text-foreground"
             >
               {interested.length}
               <span className="text-[15px] text-muted-foreground">/{interests.length}</span>
             </div>
-            <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            <div className="mt-1 text-[11.5px] font-medium text-muted-foreground">
               interested / responses
             </div>
           </div>
@@ -127,7 +127,7 @@ export function CastingDetail({ casting: c }) {
                   if (result?.error) setRowError(result.error);
                 });
               }}
-              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-60"
+              className="pressable inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-60"
             >
               <XCircle className="h-3 w-3" />
               {closingPending ? "Closing…" : "Close casting"}
@@ -144,7 +144,7 @@ export function CastingDetail({ casting: c }) {
 
       <section className="mt-10">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Expressions of interest
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -199,7 +199,7 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
               className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-border/60"
             />
           ) : (
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-muted/60 font-serif text-[15px] font-light italic text-foreground ring-1 ring-border/60">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-muted/60 text-[13.5px] font-medium text-foreground ring-1 ring-border/60">
               {t?.first_name?.[0]}
               {t?.last_name?.[0]}
             </span>
@@ -209,13 +209,13 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
               href={`/admin/talent/${t?.id}`}
               className="group inline-flex items-baseline gap-1.5"
             >
-              <span className="truncate font-serif text-[18px] font-light text-foreground group-hover:underline">
+              <span className="truncate text-[13.5px] font-medium text-foreground group-hover:underline">
                 {t?.first_name} {t?.last_name}
               </span>
               <ArrowUpRight className="h-3 w-3 text-muted-foreground/40" />
             </Link>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
-              <span className="uppercase tracking-[0.1em]">{statusLabel(t?.category)}</span>
+              <span className="">{statusLabel(t?.category)}</span>
               <span>·</span>
               <span>{statusLabel(t?.primary_location)}</span>
             </div>
@@ -237,11 +237,11 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
         </div>
 
         <div className="col-span-3">
-          <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Response · {relativeTime(i.created_at)}
           </div>
           <div
-            className={`mt-1 text-[12px] uppercase tracking-[0.1em] ${
+            className={`mt-1 text-[12px] ${
               notAvailable ? "text-muted-foreground" : "text-success"
             }`}
           >
@@ -256,16 +256,16 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
         </div>
 
         <div className="col-span-2">
-          <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Stage
           </div>
-          <div className="mt-1 text-[11px] uppercase tracking-[0.12em]">
+          <div className="mt-1 text-[11.5px] font-medium">
             {i.selected ? (
-              <span className="inline-flex items-center gap-1 text-bronze">
+              <span className="inline-flex items-center gap-1 text-brand">
                 <Star className="h-3 w-3 fill-current" /> Selected
               </span>
             ) : i.shortlisted ? (
-              <span className="text-bronze">Shortlisted</span>
+              <span className="text-brand">Shortlisted</span>
             ) : (
               <span className="text-muted-foreground">—</span>
             )}
@@ -279,7 +279,7 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
                 type="button"
                 disabled={busy}
                 onClick={() => onShortlist(!i.shortlisted)}
-                className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze disabled:opacity-60"
+                className="pressable inline-flex h-7 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand disabled:opacity-60"
               >
                 {i.shortlisted ? "Remove shortlist" : "Shortlist"}
               </button>
@@ -295,7 +295,7 @@ function InterestRow({ interest: i, busy, onShortlist, onSelect }) {
                     onSelect();
                   }
                 }}
-                className="pressable inline-flex h-7 items-center gap-1 rounded-full bg-foreground px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-background disabled:opacity-60"
+                className="pressable inline-flex h-7 items-center gap-1 rounded-lg bg-brand px-2.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-60"
               >
                 <Check className="h-3 w-3" />
                 Select
@@ -312,8 +312,8 @@ function ConvertSection({ casting: c, selected }) {
   const [state, action, pending] = useActionState(convertCastingToBooking, undefined);
 
   return (
-    <section className="mt-12 rounded-sm border border-bronze/30 bg-bronze/[0.04] p-5">
-      <div className="border-b border-bronze/20 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-bronze">
+    <section className="mt-12 rounded-sm border border-brand/30 bg-brand/[0.04] p-5">
+      <div className="border-b border-brand/20 pb-2 text-[11.5px] font-medium text-brand">
         Convert to booking
       </div>
       {state?.success && state.bookingId ? (

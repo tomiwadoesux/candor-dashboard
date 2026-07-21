@@ -29,7 +29,7 @@ export default async function InvoicingAdminPage({ searchParams }) {
         meta={`${payments.length} payment${payments.length === 1 ? "" : "s"} in view`}
         title={
           <>
-            Invoicing <span className="editorial-italic">&amp; payouts</span>
+            Invoicing &amp; payouts
           </>
         }
         lede={
@@ -50,7 +50,7 @@ export default async function InvoicingAdminPage({ searchParams }) {
           label="Client paid"
           value={summary.clientPaid.count}
           sub={grossOf(summary.clientPaid.totals)}
-          accent="bronze"
+          accent="brand"
         />
         <Stat
           label="Talent paid"
@@ -67,7 +67,7 @@ export default async function InvoicingAdminPage({ searchParams }) {
           label="Commission · YTD"
           value={moneyList(summary.ytdCommission, "—")}
           sub="Agency share"
-          accent="bronze"
+          accent="brand"
         />
       </div>
 

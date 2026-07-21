@@ -16,7 +16,7 @@ export default async function CastingDetailPage({ params }) {
     <div>
       <Link
         href="/admin/casting"
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to casting board

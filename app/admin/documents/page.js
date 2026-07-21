@@ -27,7 +27,7 @@ export default async function DocumentsAdminPage({ searchParams }) {
       <PageIntro
         eyebrow="Operations · Documents"
         meta={`${documents.length} on file`}
-        title={<span className="editorial-italic">Vault</span>}
+        title="Documents"
         lede="Agreements, deal memos, call sheets, statements and policy — everything the agency signs, sends, or files. File upload is coming; documents are linked by URL for now."
       />
 
@@ -35,7 +35,7 @@ export default async function DocumentsAdminPage({ searchParams }) {
         <Stat label="In view" value={documents.length} sub="Current filters" />
         <Stat label="Signed" value={signed} sub="Date signed on record" accent="success" />
         <Stat label="Personalised" value={personalised} sub="Talent-specific" />
-        <Stat label="New" value={recent} sub="Last 14 days" accent="bronze" />
+        <Stat label="New" value={recent} sub="Last 14 days" accent="brand" />
       </div>
 
       <div className="mt-10">

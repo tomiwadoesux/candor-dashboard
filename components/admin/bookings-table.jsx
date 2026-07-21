@@ -68,11 +68,11 @@ export function BookingsTable({ bookings, status = "" }) {
                 <div className="col-span-2 flex flex-col pl-4">
                   <span
                     data-slot="numeric"
-                    className="font-serif text-[32px] font-light leading-none tracking-[-0.02em] text-foreground"
+                    className="text-[22px] font-semibold tracking-[-0.02em] leading-none tracking-[-0.02em] text-foreground"
                   >
                     {r.d}
                   </span>
-                  <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <span className="mt-1 font-mono text-[10.5px] text-muted-foreground">
                     {r.month} · {r.year}
                   </span>
                 </div>
@@ -80,12 +80,12 @@ export function BookingsTable({ bookings, status = "" }) {
                   {String(i + 1).padStart(2, "0")}
                 </div>
                 <div className="col-span-6 min-w-0">
-                  <h3 className="truncate font-serif text-[19px] font-light text-foreground">
+                  <h3 className="truncate text-[13.5px] font-medium text-foreground">
                     {b.project_title}
                   </h3>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                     {b.service_type && (
-                      <span className="uppercase tracking-[0.1em]">{b.service_type}</span>
+                      <span className="">{b.service_type}</span>
                     )}
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
@@ -114,7 +114,7 @@ export function BookingsTable({ bookings, status = "" }) {
                 <div className="col-span-3 text-right">
                   <div
                     data-slot="numeric"
-                    className="font-serif text-[18px] font-light text-foreground"
+                    className="text-[13.5px] font-medium text-foreground"
                   >
                     {money(b.talent_fee, b.fee_currency)}
                   </div>

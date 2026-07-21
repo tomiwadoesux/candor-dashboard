@@ -21,7 +21,7 @@ function shootDates(c) {
   return `${dateShort(c.shoot_date_start)} – ${dateShort(c.shoot_date_end)}`;
 }
 
-function CastingCard({ casting: c, index }) {
+function CastingCard({ casting: c }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState(null);
   const [conflictNotice, setConflictNotice] = useState(false);
@@ -48,96 +48,79 @@ function CastingCard({ casting: c, index }) {
   return (
     <li
       className={cn(
-        "group relative border-b border-border py-8",
+        "card-hover rounded-2xl border border-border bg-card p-5",
         closed && "opacity-60"
       )}
     >
-      <div className="grid grid-cols-12 gap-8">
-        <div className="col-span-12 md:col-span-2">
-          <div
-            data-slot="numeric"
-            className="font-serif text-[34px] font-light leading-none tracking-[-0.02em] text-foreground/40"
-          >
-            {String(index + 1).padStart(2, "0")}
-          </div>
-          <div
-            className={cn(
-              "mt-3 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10.5px] font-medium",
-              closed
-                ? "bg-muted text-muted-foreground"
-                : "bg-surface-muted text-muted-foreground"
-            )}
-          >
-            <Clock className="h-3 w-3" />
-            {closed ? "Closed" : `Closes ${relativeTime(c.deadline)}`}
-          </div>
-          {(shortlisted || selected) && (
-            <div className="mt-3 flex flex-col items-start gap-1.5">
-              {selected ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-[10.5px] font-medium text-success">
-                  <Award className="h-3 w-3" /> Selected
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-bronze/10 px-2 py-0.5 text-[10.5px] font-medium text-bronze">
-                  <Star className="h-3 w-3" /> Shortlisted
-                </span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                closed
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-brand-soft text-brand-soft-foreground"
               )}
-            </div>
-          )}
-        </div>
+            >
+              <Clock className="h-3 w-3" />
+              {closed ? "Closed" : `Closes ${relativeTime(c.deadline)}`}
+            </span>
+            {selected && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success">
+                <Award className="h-3 w-3" /> Selected
+              </span>
+            )}
+            {shortlisted && !selected && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
+                <Star className="h-3 w-3" /> Shortlisted
+              </span>
+            )}
+          </div>
 
-        <div className="col-span-12 md:col-span-7">
-          <h3 className="font-serif text-[24px] font-light leading-[1.15] tracking-[-0.02em] text-foreground">
-            <span className="editorial-italic">{c.title}</span>
+          <h3 className="mt-2.5 text-[16px] font-semibold leading-snug tracking-[-0.01em] text-foreground">
+            {c.title}
           </h3>
-          <div className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+          <div className="mt-1 text-[12px] text-muted-foreground">
             {[c.work_type, statusLabel(c.category), statusLabel(c.location)]
               .filter(Boolean)
               .join(" · ")}
           </div>
 
           {c.description && (
-            <p className="mt-4 max-w-[56ch] text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-3 max-w-[62ch] text-[13px] leading-relaxed text-muted-foreground">
               {c.description}
             </p>
           )}
 
-          <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[12px]">
+          <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[12.5px] md:grid-cols-4">
             <div>
-              <dt className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60">
-                Shoot dates
-              </dt>
-              <dd className="mt-0.5 text-foreground">{shootDates(c)}</dd>
+              <dt className="text-[11.5px] text-muted-foreground">Shoot dates</dt>
+              <dd className="mt-0.5 font-medium text-foreground">{shootDates(c)}</dd>
             </div>
             <div>
-              <dt className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60">
-                Location
-              </dt>
-              <dd className="mt-0.5 inline-flex items-center gap-1 text-foreground">
+              <dt className="text-[11.5px] text-muted-foreground">Location</dt>
+              <dd className="mt-0.5 inline-flex items-center gap-1 font-medium text-foreground">
                 <MapPin className="h-3 w-3 text-muted-foreground" />
                 {statusLabel(c.location)}
               </dd>
             </div>
             {c.requirements && (
               <div>
-                <dt className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60">
-                  Requirements
-                </dt>
-                <dd className="mt-0.5 text-foreground">{c.requirements}</dd>
+                <dt className="text-[11.5px] text-muted-foreground">Requirements</dt>
+                <dd className="mt-0.5 font-medium text-foreground">{c.requirements}</dd>
               </div>
             )}
             {c.media_usage && (
               <div>
-                <dt className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60">
-                  Usage
-                </dt>
-                <dd className="mt-0.5 text-foreground">{c.media_usage}</dd>
+                <dt className="text-[11.5px] text-muted-foreground">Usage</dt>
+                <dd className="mt-0.5 font-medium text-foreground">{c.media_usage}</dd>
               </div>
             )}
           </dl>
 
           {conflict && (
-            <div className="mt-5 inline-flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-[11.5px] text-warning">
+            <div className="mt-4 inline-flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-[12px] text-warning">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
                 Calendar conflict
@@ -149,17 +132,17 @@ function CastingCard({ casting: c, index }) {
           )}
 
           {error && (
-            <p className="mt-4 inline-flex items-center gap-1.5 text-[12px] text-destructive">
+            <p className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-destructive">
               <AlertTriangle className="h-3.5 w-3.5" />
               {error}
             </p>
           )}
         </div>
 
-        <div className="col-span-12 flex items-start justify-end md:col-span-3">
+        <div className="flex shrink-0 flex-col items-end gap-2">
           {response === "interested" ? (
-            <div className="flex flex-col items-end gap-2">
-              <span className="slide-up-in inline-flex items-center gap-2 rounded-full bg-success/10 px-3.5 py-2 text-[12px] font-medium text-success">
+            <>
+              <span className="slide-up-in inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[12px] font-medium text-success">
                 <Check className="h-3.5 w-3.5" />
                 Interest submitted
               </span>
@@ -168,16 +151,16 @@ function CastingCard({ casting: c, index }) {
                   type="button"
                   disabled={pending}
                   onClick={() => act(() => withdrawInterest(c.id))}
-                  className="pressable inline-flex items-center gap-1 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                  className="pressable inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                 >
                   <X className="h-3 w-3" />
                   {pending ? "Withdrawing…" : "Withdraw"}
                 </button>
               )}
-            </div>
+            </>
           ) : response === "not_available" ? (
-            <div className="flex flex-col items-end gap-2">
-              <span className="slide-up-in inline-flex items-center gap-2 rounded-full bg-muted px-3.5 py-2 text-[12px] font-medium text-muted-foreground">
+            <>
+              <span className="slide-up-in inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                 <X className="h-3.5 w-3.5" />
                 Marked unavailable
               </span>
@@ -186,23 +169,19 @@ function CastingCard({ casting: c, index }) {
                   type="button"
                   disabled={pending}
                   onClick={() => act(() => expressInterest(c.id, "interested"))}
-                  className="pressable inline-flex items-center gap-1 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                  className="pressable text-[12px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                 >
-                  {pending ? "Saving…" : "Changed your mind? I'm interested"}
+                  {pending ? "Saving…" : "Actually, I'm interested"}
                 </button>
               )}
-            </div>
-          ) : closed ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11.5px] font-medium text-muted-foreground">
-              Closed
-            </span>
-          ) : (
-            <div className="flex flex-col items-stretch gap-2 md:w-full">
+            </>
+          ) : closed ? null : (
+            <>
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => act(() => expressInterest(c.id, "interested"))}
-                className="pressable inline-flex h-10 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-[12.5px] font-medium text-background transition-transform duration-150 hover:-translate-y-[1px] disabled:opacity-60"
+                className="pressable inline-flex h-9 w-36 items-center justify-center rounded-lg bg-brand text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-60"
               >
                 {pending ? "Saving…" : "I'm interested"}
               </button>
@@ -210,11 +189,11 @@ function CastingCard({ casting: c, index }) {
                 type="button"
                 disabled={pending}
                 onClick={() => act(() => expressInterest(c.id, "not_available"))}
-                className="pressable inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-background px-4 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-60"
+                className="pressable inline-flex h-9 w-36 items-center justify-center rounded-lg border border-border bg-surface text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-60"
               >
                 Not available
               </button>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -224,23 +203,21 @@ function CastingCard({ casting: c, index }) {
 
 export function CastingBoard({ castings }) {
   return (
-    <div className="max-w-[1180px]">
-      <ol className="border-t border-border">
-        {castings.map((c, idx) => (
-          <CastingCard key={c.id} casting={c} index={idx} />
-        ))}
+    <ol className="stagger-in space-y-4">
+      {castings.map((c) => (
+        <CastingCard key={c.id} casting={c} />
+      ))}
 
-        {castings.length === 0 && (
-          <li className="py-16 text-center">
-            <p className="font-serif text-[18px] italic text-muted-foreground">
-              Nothing open right now.
-            </p>
-            <p className="mt-1 text-[12px] text-muted-foreground/70">
-              New briefs arrive as clients send them in.
-            </p>
-          </li>
-        )}
-      </ol>
-    </div>
+      {castings.length === 0 && (
+        <li className="rounded-2xl border border-dashed border-border bg-surface-muted/40 py-14 text-center">
+          <p className="text-[14px] font-medium text-foreground">
+            Nothing open right now
+          </p>
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            New briefs arrive as clients send them in.
+          </p>
+        </li>
+      )}
+    </ol>
   );
 }

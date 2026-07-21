@@ -45,7 +45,7 @@ function TalentRow({ talent, conflictAccent }) {
           className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border/60"
         />
       ) : (
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted/60 font-serif text-[15px] font-light italic text-foreground ring-1 ring-border/60">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted/60 text-[13.5px] font-medium text-foreground ring-1 ring-border/60">
           {talent.first_name?.[0]}
           {talent.last_name?.[0]}
         </span>
@@ -87,7 +87,7 @@ function Group({ eyebrow, accent, dot, talent, empty, conflictAccent }) {
       <div className="flex items-center gap-2 border-b border-border/60 pb-2">
         <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
         <span
-          className={`text-[10px] font-medium uppercase tracking-[0.18em] ${accent}`}
+          className={`text-[11.5px] font-medium ${accent}`}
         >
           {eyebrow}
         </span>
@@ -135,7 +135,7 @@ export default async function AvailabilityPage({ searchParams }) {
     <div>
       <Link
         href="/admin/tools"
-        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to tools
@@ -147,7 +147,7 @@ export default async function AvailabilityPage({ searchParams }) {
           meta={`${dateShort(from)} – ${dateShort(to)}`}
           title={
             <>
-              Availability <span className="editorial-italic">radar</span>
+              Availability radar
             </>
           }
           lede="Who is free, pencilled or booked in a date window — pending and confirmed bookings count as holds."
@@ -176,7 +176,7 @@ export default async function AvailabilityPage({ searchParams }) {
         </Field>
         <button
           type="submit"
-          className="pressable inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-[11.5px] font-medium uppercase tracking-[0.14em] text-background"
+          className="pressable inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand px-4 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
         >
           <Search className="h-3.5 w-3.5" />
           Scan

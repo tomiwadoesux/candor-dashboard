@@ -50,7 +50,7 @@ export function DocumentsVault({ documents, talent = [], talentId = "", type = "
         </select>
         <button
           type="submit"
-          className="pressable inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          className="pressable inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
         >
           Apply
         </button>
@@ -67,7 +67,7 @@ export function DocumentsVault({ documents, talent = [], talentId = "", type = "
                     href={d.file_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="block truncate font-serif text-[16px] font-light text-foreground underline-offset-2 hover:underline"
+                    className="block truncate text-[13.5px] font-medium text-foreground underline-offset-2 hover:underline"
                   >
                     {d.title}
                   </a>
@@ -77,10 +77,10 @@ export function DocumentsVault({ documents, talent = [], talentId = "", type = "
                   </div>
                 </div>
               </div>
-              <div className="col-span-3 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <div className="col-span-3 text-[11.5px] font-medium text-muted-foreground">
                 {statusLabel(d.document_type)}
                 {d.is_personalised && (
-                  <span className="ml-2 rounded-sm bg-bronze/10 px-1.5 py-0.5 text-[9px] tracking-[0.12em] text-bronze">
+                  <span className="ml-2 rounded-sm bg-brand/10 px-1.5 py-0.5 text-[9px] tracking-[0.12em] text-brand">
                     Personalised
                   </span>
                 )}
@@ -95,11 +95,11 @@ export function DocumentsVault({ documents, talent = [], talentId = "", type = "
               </div>
               <div className="col-span-2 text-right">
                 {d.date_signed ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-success">
+                  <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-success">
                     <Check className="h-3 w-3" /> Signed {dateShort(d.date_signed)}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground">
                     <Clock className="h-3 w-3" /> Unsigned
                   </span>
                 )}

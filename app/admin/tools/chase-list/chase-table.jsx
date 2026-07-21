@@ -51,7 +51,7 @@ export function ChaseTable({ rows }) {
           <li key={row.id} className="py-4">
             <div className="grid grid-cols-12 items-baseline gap-x-4">
               <div className="col-span-3 min-w-0">
-                <div className="truncate font-serif text-[16px] font-light text-foreground">
+                <div className="truncate text-[13.5px] font-medium text-foreground">
                   {client?.company_name || "—"}
                 </div>
                 <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
@@ -86,7 +86,7 @@ export function ChaseTable({ rows }) {
               <div className="col-span-2 text-right">
                 <div
                   data-slot="numeric"
-                  className="font-serif text-[16px] font-light text-foreground"
+                  className="text-[13.5px] font-medium text-foreground"
                 >
                   {money(row.gross_fee, row.currency)}
                 </div>
@@ -111,7 +111,7 @@ export function ChaseTable({ rows }) {
                   type="button"
                   onClick={() => setOpenId(open ? null : row.id)}
                   aria-expanded={open}
-                  className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze"
+                  className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand"
                 >
                   <ChevronDown
                     className={`h-3 w-3 transition-transform duration-200 ease-[var(--ease-out)] ${open ? "rotate-180" : ""}`}
@@ -121,7 +121,7 @@ export function ChaseTable({ rows }) {
 
                 {open && (
                   <div className="slide-up-in mt-3 rounded-sm border border-border/60 bg-muted/20 p-4">
-                    <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+                    <div className="text-[11.5px] font-medium text-muted-foreground/70">
                       Subject
                     </div>
                     <div className="mt-1 text-[12.5px] text-foreground">
@@ -137,7 +137,7 @@ export function ChaseTable({ rows }) {
                       <button
                         type="button"
                         onClick={() => copyDraft(row)}
-                        className="pressable inline-flex h-7 items-center gap-1.5 rounded-full bg-foreground px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-background"
+                        className="pressable inline-flex h-7 items-center gap-1.5 rounded-lg bg-brand px-2.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
                       >
                         {copiedId === row.id ? (
                           <>
@@ -154,7 +154,7 @@ export function ChaseTable({ rows }) {
                       {mailto ? (
                         <a
                           href={mailto}
-                          className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-bronze hover:text-bronze"
+                          className="pressable inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-brand hover:text-brand"
                         >
                           <Mail className="h-3 w-3" />
                           Open in email

@@ -8,7 +8,7 @@ const ACCENTS = {
   success: "text-success",
   warning: "text-warning",
   destructive: "text-destructive",
-  bronze: "text-bronze",
+  brand: "text-brand",
   muted: "text-muted-foreground",
 };
 
@@ -18,7 +18,7 @@ export function accentText(accent) {
 
 export function Eyebrow({ children }) {
   return (
-    <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+    <div className="text-[12px] font-medium text-muted-foreground">
       {children}
     </div>
   );
@@ -27,15 +27,17 @@ export function Eyebrow({ children }) {
 export function PageIntro({ eyebrow, meta, title, lede }) {
   return (
     <>
-      <div className="flex items-baseline justify-between pb-2">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        {meta && <div className="text-[11px] text-muted-foreground">{meta}</div>}
-      </div>
-      <h1 className="font-serif text-[36px] font-light leading-[1.05] tracking-[-0.02em] text-foreground">
+      {(eyebrow || meta) && (
+        <div className="flex items-baseline justify-between pb-1.5">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          {meta && <div className="text-[12px] text-muted-foreground">{meta}</div>}
+        </div>
+      )}
+      <h1 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
         {title}
       </h1>
       {lede && (
-        <p className="mt-2 max-w-[62ch] text-[13px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 max-w-[58ch] text-[13px] leading-relaxed text-muted-foreground">
           {lede}
         </p>
       )}
@@ -46,19 +48,17 @@ export function PageIntro({ eyebrow, meta, title, lede }) {
 export function Stat({ label, value, sub, accent }) {
   return (
     <div>
-      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
-        {label}
-      </div>
+      <div className="text-[12px] font-medium text-muted-foreground">{label}</div>
       <div
         data-slot="numeric"
         className={cn(
-          "mt-2 font-serif text-[28px] font-light leading-none tracking-[-0.02em]",
+          "mt-1.5 text-[22px] font-medium leading-none tracking-[-0.01em]",
           accentText(accent)
         )}
       >
         {value}
       </div>
-      {sub && <div className="mt-1 text-[11px] text-muted-foreground">{sub}</div>}
+      {sub && <div className="mt-1.5 text-[12px] text-muted-foreground/80">{sub}</div>}
     </div>
   );
 }
@@ -69,13 +69,15 @@ export function bookingAccent(status) {
     case "confirmed":
       return "success";
     case "completed":
-      return "bronze";
+      return "muted";
     case "casting_sent":
-      return "bronze";
+      return "brand";
     case "cancelled":
       return "destructive";
+    case "pending":
+      return "warning";
     default:
-      return "muted"; // pending
+      return "muted";
   }
 }
 
@@ -85,7 +87,7 @@ export function paymentAccent(status) {
     case "talent_paid":
       return "success";
     case "client_paid":
-      return "bronze";
+      return "brand";
     case "awaiting_client_payment":
       return "warning";
     default:
@@ -97,8 +99,8 @@ const DOTS = {
   success: "bg-success",
   warning: "bg-warning",
   destructive: "bg-destructive",
-  bronze: "bg-bronze",
-  muted: "bg-muted-foreground",
+  brand: "bg-brand",
+  muted: "bg-muted-foreground/60",
 };
 
 export function StatusPill({ status, accent, className }) {
@@ -106,7 +108,7 @@ export function StatusPill({ status, accent, className }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em]",
+        "inline-flex items-center gap-1.5 text-[12px] font-medium",
         accentText(a),
         className
       )}
@@ -126,7 +128,7 @@ export function moneyList(totals, fallback = "—") {
 
 export function EmptyRow({ children, className }) {
   return (
-    <li className={cn("py-10 text-center text-[12px] text-muted-foreground", className)}>
+    <li className={cn("py-10 text-center text-[13px] text-muted-foreground", className)}>
       {children}
     </li>
   );

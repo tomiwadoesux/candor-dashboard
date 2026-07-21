@@ -54,7 +54,7 @@ export default async function ToolsPage() {
         meta={`${TOOLS.length} tools`}
         title={
           <>
-            Internal <span className="editorial-italic">tools</span>
+            Internal tools
           </>
         }
         lede="Speed-tools for the booking desk — parse briefs, scan availability, chase what's overdue and package talent."
@@ -68,10 +68,10 @@ export default async function ToolsPage() {
             className="card-hover pressable group flex flex-col rounded-sm border border-border bg-card p-5"
           >
             <div className="flex items-start justify-between">
-              <tool.icon className="h-4 w-4 text-bronze" />
+              <tool.icon className="h-4 w-4 text-brand" />
               <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
             </div>
-            <div className="mt-5 font-serif text-[18px] font-light tracking-[-0.01em] text-foreground">
+            <div className="mt-5 text-[13.5px] font-medium tracking-[-0.01em] text-foreground">
               {tool.name}
             </div>
             <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">

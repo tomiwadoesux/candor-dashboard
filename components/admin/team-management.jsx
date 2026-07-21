@@ -38,7 +38,7 @@ export function TeamManagement({ team, viewer }) {
   return (
     <section>
       <div className="flex items-baseline justify-between pb-3">
-        <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="text-[11.5px] font-medium text-muted-foreground/70">
           The team
         </div>
         <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ export function TeamManagement({ team, viewer }) {
           <button
             type="button"
             onClick={() => setShowForm((v) => !v)}
-            className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-background"
+            className="pressable inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3.5 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
           >
             {showForm ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
             {showForm ? "Close" : "Add account"}
@@ -72,7 +72,7 @@ export function TeamManagement({ team, viewer }) {
                 №{String(i + 1).padStart(2, "0")}
               </div>
               <div className="col-span-4 flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-muted/60 font-serif text-[13px] font-light italic text-foreground ring-1 ring-border/60">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-muted/60 text-[12.5px] text-foreground ring-1 ring-border/60">
                   {(m.full_name || "?")
                     .split(" ")
                     .map((p) => p[0])
@@ -81,10 +81,10 @@ export function TeamManagement({ team, viewer }) {
                     .toUpperCase()}
                 </span>
                 <div className="min-w-0">
-                  <h3 className="truncate font-serif text-[18px] font-light text-foreground">
+                  <h3 className="truncate text-[13.5px] font-medium text-foreground">
                     {m.full_name}
                     {m.id === viewer.id && (
-                      <span className="ml-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                      <span className="ml-2 text-[11.5px] font-medium text-muted-foreground">
                         You
                       </span>
                     )}
@@ -95,7 +95,7 @@ export function TeamManagement({ team, viewer }) {
                 </div>
               </div>
               <div className="col-span-2">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Role
                 </div>
                 <div className="mt-0.5 text-[12.5px] text-foreground">
@@ -103,7 +103,7 @@ export function TeamManagement({ team, viewer }) {
                 </div>
               </div>
               <div className="col-span-2">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Since
                 </div>
                 <div className="mt-0.5 font-mono text-[11px] text-foreground">
@@ -123,7 +123,7 @@ export function TeamManagement({ team, viewer }) {
                     type="button"
                     disabled={busyId === m.id}
                     onClick={() => handleToggle(m)}
-                    className="pressable inline-flex h-7 items-center rounded-full border border-border bg-card px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-60"
+                    className="pressable inline-flex h-7 items-center rounded-full border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-60"
                   >
                     {busyId === m.id
                       ? "Working…"
@@ -160,7 +160,7 @@ function CreateAccountForm({ viewerRole }) {
       action={action}
       className="mb-6 space-y-4 rounded-sm border border-border/60 bg-muted/20 p-5"
     >
-      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+      <div className="text-[11.5px] font-medium text-muted-foreground/70">
         New team account · they set their password via the forgot-password flow
       </div>
       <FormError error={state?.error} />

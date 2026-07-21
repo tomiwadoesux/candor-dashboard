@@ -24,7 +24,9 @@ export default async function AdminLayout({ children }) {
           <AdminSidebar profile={plainProfile} />
           <div className="flex min-w-0 flex-1 flex-col">
             <AdminTopbar profile={plainProfile} />
-            <main className="flex-1 px-8 py-8 slide-up-in">{children}</main>
+            <main className="flex-1 px-6 py-8 md:px-8">
+              <div className="mx-auto w-full max-w-[1280px]">{children}</div>
+            </main>
           </div>
         </div>
       </SidebarProvider>

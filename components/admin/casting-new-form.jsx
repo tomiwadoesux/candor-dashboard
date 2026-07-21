@@ -40,7 +40,7 @@ export function CastingNewForm({ clients = [], defaults = {} }) {
       <FormError error={state?.error} />
 
       <section>
-        <div className="border-b border-border/60 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+        <div className="border-b border-border/60 pb-2 text-[11.5px] font-medium text-muted-foreground/70">
           Public brief · visible to talent
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -145,7 +145,7 @@ export function CastingNewForm({ clients = [], defaults = {} }) {
       </section>
 
       <section className="rounded-sm border border-warning/30 bg-warning/[0.04] p-5">
-        <div className="flex items-center gap-2 border-b border-warning/20 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-warning">
+        <div className="flex items-center gap-2 border-b border-warning/20 pb-2 text-[11.5px] font-medium text-warning">
           <Lock className="h-3 w-3" />
           Internal only · never shown to talent
         </div>

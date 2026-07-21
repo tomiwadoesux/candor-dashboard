@@ -6,16 +6,19 @@ import { cn } from "@/lib/utils";
 import { dateShort } from "@/lib/format";
 import { submitMilestone } from "@/lib/actions/milestones";
 
+const inputClass =
+  "w-full rounded-lg border border-input bg-surface px-3 text-[13px] text-foreground transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)] placeholder:text-muted-foreground/50 focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-ring";
+
 export function MilestoneSubmitForm({ bookings }) {
   const [state, formAction, pending] = useActionState(submitMilestone, undefined);
 
   if (bookings.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-surface-muted/40 p-6 text-center">
-        <p className="font-serif text-[15px] italic text-foreground/90">
+        <p className="text-[13.5px] font-medium text-foreground">
           {state?.success
             ? "Thanks — your win is with Candor for review."
-            : "No completed bookings to share yet."}
+            : "No completed bookings to share yet"}
         </p>
         <p className="mt-1 text-[12px] text-muted-foreground">
           {state?.success
@@ -30,7 +33,7 @@ export function MilestoneSubmitForm({ bookings }) {
     <form action={formAction} className="rounded-xl border border-border bg-card p-5">
       <label
         htmlFor="milestone-booking"
-        className="block text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70"
+        className="block text-[12.5px] font-medium text-foreground/90"
       >
         Which booking?
       </label>
@@ -39,7 +42,7 @@ export function MilestoneSubmitForm({ bookings }) {
         name="bookingId"
         required
         defaultValue=""
-        className="mt-2 h-9 w-full rounded-md border border-border bg-background px-2.5 text-[13px] text-foreground focus:border-border-strong focus:outline-none"
+        className={cn(inputClass, "mt-1.5 h-9")}
       >
         <option value="" disabled>
           Pick a completed booking…
@@ -51,11 +54,11 @@ export function MilestoneSubmitForm({ bookings }) {
         ))}
       </select>
 
-      <fieldset className="mt-5">
-        <legend className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
+      <fieldset className="mt-4">
+        <legend className="text-[12.5px] font-medium text-foreground/90">
           Visibility
         </legend>
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           {[
             { value: "named", label: "Share my name" },
             { value: "anonymous", label: "Keep me anonymous" },
@@ -63,9 +66,9 @@ export function MilestoneSubmitForm({ bookings }) {
             <label
               key={opt.value}
               className={cn(
-                "flex h-9 cursor-pointer items-center justify-center rounded-full border px-3 text-[12px] font-medium transition-colors",
+                "flex h-9 cursor-pointer items-center justify-center rounded-lg border px-3 text-[12.5px] font-medium transition-colors duration-140",
                 "border-border text-muted-foreground hover:border-border-strong hover:text-foreground",
-                "has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background"
+                "has-[:checked]:border-brand has-[:checked]:bg-brand-soft has-[:checked]:text-brand-soft-foreground"
               )}
             >
               <input
@@ -83,10 +86,10 @@ export function MilestoneSubmitForm({ bookings }) {
 
       <label
         htmlFor="milestone-text"
-        className="mt-5 block text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70"
+        className="mt-4 block text-[12.5px] font-medium text-foreground/90"
       >
         Your line{" "}
-        <span className="lowercase text-muted-foreground/50">
+        <span className="font-normal text-muted-foreground/60">
           (optional — we&apos;ll write one if blank)
         </span>
       </label>
@@ -96,7 +99,7 @@ export function MilestoneSubmitForm({ bookings }) {
         rows={2}
         maxLength={500}
         placeholder="e.g. Landed my first international campaign…"
-        className="mt-2 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:border-border-strong focus:outline-none"
+        className={cn(inputClass, "mt-1.5 resize-none py-2")}
       />
 
       {state?.error && (
@@ -115,7 +118,7 @@ export function MilestoneSubmitForm({ bookings }) {
       <button
         type="submit"
         disabled={pending}
-        className="pressable mt-4 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-foreground px-4 text-[12.5px] font-medium text-background transition-opacity disabled:opacity-60"
+        className="pressable mt-4 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-brand px-4 text-[13px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-60"
       >
         {pending ? "Submitting…" : "Send to Candor"}
       </button>

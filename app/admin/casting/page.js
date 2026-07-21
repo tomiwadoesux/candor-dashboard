@@ -30,7 +30,7 @@ export default async function CastingAdminPage({ searchParams }) {
         meta={`${castings.length} brief${castings.length === 1 ? "" : "s"} on the wall`}
         title={
           <>
-            Casting <span className="editorial-italic">&amp; selection</span>
+            Casting &amp; selection
           </>
         }
         lede="Live briefs from clients — where interest becomes a shortlist, and a shortlist becomes a booking. Brand names stay internal until selection."
@@ -39,7 +39,7 @@ export default async function CastingAdminPage({ searchParams }) {
       <div className="mt-6 flex justify-end">
         <Link
           href="/admin/casting/new"
-          className="pressable inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-[11.5px] font-medium uppercase tracking-[0.14em] text-background"
+          className="pressable inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand px-4 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
         >
           <Plus className="h-3.5 w-3.5" />
           Post a casting
@@ -60,7 +60,7 @@ export default async function CastingAdminPage({ searchParams }) {
           label="Interested"
           value={totalInterested}
           sub="Hands raised"
-          accent={totalInterested > 0 ? "bronze" : null}
+          accent={totalInterested > 0 ? "brand" : null}
         />
       </div>
 

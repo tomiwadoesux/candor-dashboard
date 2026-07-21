@@ -14,7 +14,7 @@ function LogoutButton() {
     <button
       type="submit"
       disabled={pending}
-      className="pressable mt-5 flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border text-[12.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-60"
+      className="pressable mt-5 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-60"
     >
       <LogOut className="h-3.5 w-3.5" />
       {pending ? "Signing out…" : "Sign out"}
@@ -41,12 +41,12 @@ export function ProfileModal({ open, onClose, profile, talent }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="slide-up-in relative w-[440px] max-w-[92vw] overflow-hidden rounded-xl border border-border bg-background shadow-[var(--shadow-lift)]"
+        className="slide-up-in relative w-[440px] max-w-[92vw] overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-pop)]"
       >
         <button
           type="button"
@@ -58,13 +58,13 @@ export function ProfileModal({ open, onClose, profile, talent }) {
         </button>
 
         <div
-          className="h-[96px]"
+          className="h-[88px]"
           style={{ background: gradientFor(talent?.id || profile?.id || "candor") }}
         />
 
         <div className="px-6 pb-6">
-          <div className="-mt-10 flex items-end gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-[20px] font-serif italic text-background shadow-[var(--shadow-lift)] ring-4 ring-background">
+          <div className="-mt-9 flex items-end gap-3">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-[20px] font-medium text-background ring-4 ring-card">
               {talent?.polaroid_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -77,22 +77,18 @@ export function ProfileModal({ open, onClose, profile, talent }) {
               )}
             </div>
             <div className="min-w-0 flex-1 pb-1">
-              <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
+              <div className="truncate text-[17px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
+                {fullName}
+              </div>
+              <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
                 {talent
                   ? `${statusLabel(talent.category)} · ${statusLabel(talent.primary_location)}`
-                  : "Candor · Talent"}
-              </div>
-              <div className="truncate font-serif text-[24px] font-light italic leading-tight text-foreground">
-                {firstName}
-              </div>
-              <div className="truncate text-[11.5px] text-muted-foreground">
-                {fullName}
-                {profile?.email ? ` · ${profile.email}` : ""}
+                  : profile?.email}
               </div>
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-0 divide-x divide-border/60 border-y border-border/60 py-3">
+          <div className="mt-5 grid grid-cols-3 divide-x divide-border/60 border-y border-border/60 py-3">
             <Stat label="Status" value={statusLabel(talent?.status) || "—"} />
             <Stat
               label="Joined"
@@ -108,26 +104,18 @@ export function ProfileModal({ open, onClose, profile, talent }) {
             />
           </div>
 
-          {talent?.bio && (
-            <p className="mt-4 line-clamp-4 text-[12.5px] leading-relaxed text-muted-foreground">
-              {talent.bio}
-            </p>
-          )}
-
-          <div className="mt-5 space-y-0.5">
+          <div className="mt-4 space-y-0.5">
             <Row
               href="/talent/portfolio"
               onClose={onClose}
               icon={Camera}
               label="Portfolio"
-              sub="Measurements, comp card, selected works"
             />
             <Row
               href="/talent/directory"
               onClose={onClose}
               icon={User}
               label="Talent directory"
-              sub="The Candor roster"
             />
           </div>
 
@@ -143,28 +131,23 @@ export function ProfileModal({ open, onClose, profile, talent }) {
 function Stat({ label, value }) {
   return (
     <div className="px-3 first:pl-0 last:pr-0">
-      <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-        {label}
-      </div>
-      <div className="mt-1 truncate font-serif text-[15px] italic text-foreground">
+      <div className="text-[11px] font-medium text-muted-foreground">{label}</div>
+      <div className="mt-0.5 truncate text-[13px] font-medium text-foreground">
         {value}
       </div>
     </div>
   );
 }
 
-function Row({ href, onClose, icon: Icon, label, sub }) {
+function Row({ href, onClose, icon: Icon, label }) {
   return (
     <Link
       href={href}
       onClick={onClose}
-      className="group flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-surface-muted"
+      className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-surface-muted"
     >
       <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
-        <div className="text-[12.5px] font-medium text-foreground">{label}</div>
-        <div className="truncate text-[11px] text-muted-foreground">{sub}</div>
-      </div>
+      <div className="flex-1 text-[13px] font-medium text-foreground">{label}</div>
       <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-foreground" />
     </Link>
   );

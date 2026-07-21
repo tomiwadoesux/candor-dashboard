@@ -1,4 +1,4 @@
-// Server-rendered roster grid — polaroid cards from the public_roster view.
+// Server-rendered roster grid — photo cards from the public_roster view.
 import { MapPin } from "lucide-react";
 import { gradientFor } from "@/lib/gradients";
 import { statusLabel } from "@/lib/format";
@@ -25,11 +25,11 @@ function IgIcon(props) {
 export function DirectoryGrid({ roster, q }) {
   if (roster.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-surface-muted/40 py-16 text-center">
-        <p className="font-serif text-[18px] italic text-muted-foreground">
-          {q ? "No one matches that." : "The roster is being curated."}
+      <div className="rounded-2xl border border-dashed border-border bg-surface-muted/40 py-14 text-center">
+        <p className="text-[14px] font-medium text-foreground">
+          {q ? "No one matches that" : "The roster is being curated"}
         </p>
-        <p className="mt-1 text-[12px] text-muted-foreground/70">
+        <p className="mt-1 text-[12.5px] text-muted-foreground">
           {q ? "Try a different name or category." : "Check back soon."}
         </p>
       </div>
@@ -37,13 +37,13 @@ export function DirectoryGrid({ roster, q }) {
   }
 
   return (
-    <ul className="stagger-in grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <ul className="stagger-in grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
       {roster.map((t) => {
         const name = `${t.first_name} ${t.last_name}`;
         const handle = t.instagram_handle?.replace(/^@/, "");
         return (
-          <li key={t.id} className="group flex flex-col items-center">
-            <div className="flex w-full max-w-[220px] flex-col overflow-hidden rounded-sm border border-border/60 bg-card transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lg">
+          <li key={t.id} className="group">
+            <div className="card-hover overflow-hidden rounded-2xl border border-border bg-card">
               <div
                 className="relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden"
                 style={
@@ -56,55 +56,37 @@ export function DirectoryGrid({ roster, q }) {
                     src={t.polaroid_url}
                     alt={name}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    className="h-full w-full object-cover transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.02]"
                   />
                 ) : (
-                  <span className="font-serif text-[72px] font-light italic tracking-[-0.04em] text-foreground/30 mix-blend-multiply transition-transform duration-500 group-hover:scale-[1.04] dark:mix-blend-screen">
+                  <span className="text-[56px] font-light tracking-[-0.04em] text-foreground/25">
                     {t.first_name?.[0]}
                   </span>
                 )}
               </div>
-              <div className="flex w-full items-center justify-between border-t border-border/40 px-3 py-2.5">
-                <span className="truncate font-serif text-[13px] italic text-foreground/90">
-                  {t.first_name}
-                </span>
-                <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/60">
-                  {statusLabel(t.category)}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex w-full flex-col items-center text-center">
-              <h3 className="font-serif text-[19px] font-light tracking-[-0.015em] text-foreground">
-                {name}
-              </h3>
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                <span>{statusLabel(t.category)}</span>
-                <span className="text-muted-foreground/40">·</span>
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-2.5 w-2.5" />
-                  {statusLabel(t.primary_location)}
-                </span>
-              </div>
-
-              {handle && (
-                <div className="mt-3">
+              <div className="px-3.5 py-3">
+                <h3 className="truncate text-[13.5px] font-semibold text-foreground">
+                  {name}
+                </h3>
+                <div className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                  <span>{statusLabel(t.category)}</span>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="inline-flex items-center gap-0.5">
+                    <MapPin className="h-2.5 w-2.5" />
+                    {statusLabel(t.primary_location)}
+                  </span>
+                </div>
+                {handle && (
                   <a
                     href={`https://instagram.com/${handle}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-7 items-center gap-1 rounded-full border border-border bg-background px-2.5 text-[11px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+                    className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-brand transition-colors hover:text-brand-hover"
                   >
                     <IgIcon className="h-3 w-3" />@{handle}
                   </a>
-                </div>
-              )}
-
-              {t.bio && (
-                <p className="mt-3 line-clamp-2 max-w-[28ch] text-[11.5px] leading-relaxed text-muted-foreground">
-                  {t.bio}
-                </p>
-              )}
+                )}
+              </div>
             </div>
           </li>
         );

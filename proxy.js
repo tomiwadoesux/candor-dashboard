@@ -58,7 +58,8 @@ export async function proxy(request) {
 
 export const config = {
   matcher: [
-    // Everything except static assets and images.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Everything except static assets, images, and the public (sessionless)
+    // API — the marketing site hits that at volume and needs no auth work.
+    "/((?!_next/static|_next/image|favicon.ico|api/public|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

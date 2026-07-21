@@ -46,7 +46,7 @@ export function MilestonesApproval({ pending }) {
                   <div className="text-[12.5px] text-foreground">
                     {t ? `${t.first_name} ${t.last_name}` : "Unknown talent"}
                   </div>
-                  <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                  <div className="mt-0.5 font-mono text-[10.5px] text-muted-foreground/70">
                     {m.visibility} · {relativeTime(m.created_at)}
                   </div>
                   {m.booking && (
@@ -69,10 +69,10 @@ export function MilestonesApproval({ pending }) {
                       onChange={(e) => setDraftText(e.target.value)}
                       rows={2}
                       autoFocus
-                      className={`${inputClass} resize-none font-serif text-[14px] italic`}
+                      className={`${inputClass} resize-none text-[12.5px]`}
                     />
                   ) : (
-                    <blockquote className="border-l border-border/60 pl-4 font-serif text-[15px] font-light italic leading-relaxed text-foreground">
+                    <blockquote className="border-l border-border/60 pl-4 text-[13.5px] font-medium leading-relaxed text-foreground">
                       &ldquo;{m.display_text}&rdquo;
                     </blockquote>
                   )}
@@ -184,7 +184,7 @@ function ActionButton({ children, onClick, disabled, primary, destructive }) {
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`pressable inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[10px] font-medium uppercase tracking-[0.12em] transition-colors disabled:opacity-60 ${
+      className={`pressable inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[11.5px] font-medium transition-colors disabled:opacity-60 ${
         primary
           ? "bg-foreground text-background"
           : destructive

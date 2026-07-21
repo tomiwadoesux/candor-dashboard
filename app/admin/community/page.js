@@ -23,7 +23,7 @@ export default async function AdminCommunityPage() {
         meta="What the roster sees on their dashboards"
         title={
           <>
-            The <span className="editorial-italic">wire</span>
+            The wire
           </>
         }
         lede="The talent-facing community feed as it stands: published milestones and open castings. Milestones are approved on the Milestones page; castings are posted from the casting board."
@@ -36,7 +36,7 @@ export default async function AdminCommunityPage() {
           label="Open castings"
           value={openCastings.length}
           sub="Accepting interest"
-          accent="bronze"
+          accent="brand"
         />
         <Stat
           label="Interest raised"
@@ -48,12 +48,12 @@ export default async function AdminCommunityPage() {
       <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-12">
         <section className="lg:col-span-7">
           <div className="flex items-baseline justify-between border-b border-border/60 pb-2">
-            <h2 className="font-serif text-[22px] font-light text-foreground">
-              <span className="editorial-italic">Milestones</span> · live
+            <h2 className="text-[15px] font-semibold text-foreground">
+              Milestones · live
             </h2>
             <Link
               href="/admin/milestones"
-              className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Review queue <ArrowUpRight className="h-3 w-3" />
             </Link>
@@ -78,12 +78,12 @@ export default async function AdminCommunityPage() {
                       className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-border/60"
                     />
                   ) : (
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-muted/60 text-bronze ring-1 ring-border/60">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-muted/60 text-brand ring-1 ring-border/60">
                       <Sparkles className="h-3.5 w-3.5" />
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <blockquote className="font-serif text-[15px] font-light italic leading-relaxed text-foreground">
+                    <blockquote className="text-[13.5px] font-medium leading-relaxed text-foreground">
                       &ldquo;{m.display_text}&rdquo;
                     </blockquote>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 text-[10.5px] text-muted-foreground">
@@ -102,12 +102,12 @@ export default async function AdminCommunityPage() {
 
         <aside className="lg:col-span-5">
           <div className="flex items-baseline justify-between border-b border-border/60 pb-2">
-            <h2 className="font-serif text-[22px] font-light text-foreground">
-              <span className="editorial-italic">Open</span> castings
+            <h2 className="text-[15px] font-semibold text-foreground">
+              Open castings
             </h2>
             <Link
               href="/admin/casting"
-              className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Board <ArrowUpRight className="h-3 w-3" />
             </Link>
@@ -135,11 +135,11 @@ export default async function AdminCommunityPage() {
                     <Clapperboard className="h-3.5 w-3.5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-serif text-[15px] font-light text-foreground">
+                    <div className="truncate text-[13.5px] font-medium text-foreground">
                       {c.title}
                     </div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10.5px] text-muted-foreground">
-                      <span className="uppercase tracking-[0.1em]">
+                      <span className="">
                         {statusLabel(c.category)}
                       </span>
                       <span>·</span>
@@ -150,7 +150,7 @@ export default async function AdminCommunityPage() {
                   </div>
                   <span
                     data-slot="numeric"
-                    className="shrink-0 font-serif text-[18px] font-light text-foreground"
+                    className="shrink-0 text-[13.5px] font-medium text-foreground"
                   >
                     {c.interestedCount ?? 0}
                   </span>

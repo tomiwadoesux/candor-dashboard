@@ -74,11 +74,11 @@ export function CastingBoard({ castings, status = "" }) {
                 №{String(i + 1).padStart(2, "0")}
               </div>
               <div className="col-span-5 min-w-0">
-                <h3 className="truncate font-serif text-[20px] font-light text-foreground">
+                <h3 className="truncate text-[15px] font-semibold text-foreground">
                   {c.title}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                  <span className="uppercase tracking-[0.1em]">
+                  <span className="">
                     {statusLabel(c.category)}
                   </span>
                   <span className="inline-flex items-center gap-1">
@@ -88,7 +88,7 @@ export function CastingBoard({ castings, status = "" }) {
                   {c.work_type && <span>{c.work_type}</span>}
                 </div>
                 {(c.brand_name_internal || c.client) && (
-                  <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-sm bg-warning/10 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-warning">
+                  <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-sm bg-warning/10 px-1.5 py-0.5 text-[11.5px] font-medium text-warning">
                     <Lock className="h-2.5 w-2.5" />
                     Internal · {c.brand_name_internal || c.client?.company_name}
                     {c.brand_name_internal && c.client
@@ -98,14 +98,14 @@ export function CastingBoard({ castings, status = "" }) {
                 )}
               </div>
               <div className="col-span-2">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Shoot
                 </div>
                 <div className="mt-0.5 font-mono text-[11px] text-foreground">
                   {dateShort(c.shoot_date_start)}
                   {c.shoot_date_end ? ` – ${dateShort(c.shoot_date_end)}` : ""}
                 </div>
-                <div className="mt-1.5 text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="mt-1.5 text-[11.5px] font-medium text-muted-foreground/70">
                   Deadline
                 </div>
                 <div className="mt-0.5 font-mono text-[11px] text-foreground">
@@ -116,12 +116,12 @@ export function CastingBoard({ castings, status = "" }) {
                 </div>
               </div>
               <div className="col-span-2 text-right">
-                <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                <div className="text-[11.5px] font-medium text-muted-foreground/70">
                   Interest
                 </div>
                 <div
                   data-slot="numeric"
-                  className="mt-0.5 font-serif text-[22px] font-light leading-none text-foreground"
+                  className="mt-0.5 text-[15px] font-semibold leading-none text-foreground"
                 >
                   {c.interestedCount ?? 0}
                   <span className="text-[13px] text-muted-foreground">
@@ -140,7 +140,7 @@ export function CastingBoard({ castings, status = "" }) {
                 type="button"
                 disabled={pendingId === c.id}
                 onClick={() => handleClose(c.id, c.title)}
-                className="pressable absolute bottom-4 right-0 inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground opacity-0 transition-opacity hover:border-destructive/40 hover:text-destructive group-hover:opacity-100 disabled:opacity-60"
+                className="pressable absolute bottom-4 right-0 inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground opacity-0 transition-opacity hover:border-destructive/40 hover:text-destructive group-hover:opacity-100 disabled:opacity-60"
               >
                 <XCircle className="h-3 w-3" />
                 {pendingId === c.id ? "Closing…" : "Close"}

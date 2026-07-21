@@ -84,8 +84,8 @@ export function BriefParser() {
 
   const ctaClass = (primary) =>
     primary
-      ? "pressable inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-4 text-[11.5px] font-medium uppercase tracking-[0.14em] text-background"
-      : "pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-[11.5px] font-medium uppercase tracking-[0.14em] text-foreground hover:border-foreground/40";
+      ? "pressable inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand px-4 text-[12.5px] font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
+      : "pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-[11.5px] font-medium text-foreground hover:border-foreground/40";
 
   return (
     <div className="space-y-8">
@@ -115,7 +115,7 @@ export function BriefParser() {
       {fields && (
         <div className="stagger-in space-y-6">
           <section className="rounded-sm border border-border bg-card p-5">
-            <div className="border-b border-border/60 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+            <div className="border-b border-border/60 pb-2 text-[11.5px] font-medium text-muted-foreground/70">
               Extracted fields · review and edit before creating
             </div>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -262,7 +262,7 @@ export function BriefParser() {
 
           {fields.notes && (
             <section className="rounded-sm border border-border/60 bg-muted/20 p-5">
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+              <div className="text-[11.5px] font-medium text-muted-foreground/70">
                 Model&rsquo;s notes
               </div>
               <p className="mt-2 whitespace-pre-wrap text-[12.5px] leading-relaxed text-muted-foreground">

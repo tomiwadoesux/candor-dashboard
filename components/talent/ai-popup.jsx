@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Send, Sparkles, ArrowUpRight } from "lucide-react";
+import { X, ArrowUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRail } from "./rail-context";
 
@@ -19,12 +19,45 @@ const SEED_MESSAGES = [
   },
 ];
 
+export function TypingDots({ className }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1", className)} aria-label="Typing">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-1.5 w-1.5 rounded-full bg-current opacity-40"
+          style={{
+            animation: "typing-dot 1.2s ease-in-out infinite",
+            animationDelay: `${i * 160}ms`,
+          }}
+        />
+      ))}
+      <style jsx>{`
+        @keyframes typing-dot {
+          0%, 60%, 100% {
+            opacity: 0.35;
+            transform: translateY(0);
+          }
+          30% {
+            opacity: 1;
+            transform: translateY(-2px);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          span {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </span>
+  );
+}
+
 export function TalentAiPopup() {
   const { aiOpen, closeAi } = useRail();
   const [messages, setMessages] = useState(SEED_MESSAGES);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
-  const panelRef = useRef(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -86,30 +119,20 @@ export function TalentAiPopup() {
         type="button"
         aria-label="Close Ask Candor"
         onClick={closeAi}
-        className="absolute inset-0 bg-background/40 backdrop-blur-[6px] transition-opacity duration-300 animate-in fade-in"
+        className="absolute inset-0 bg-background/40 backdrop-blur-[6px]"
       />
 
-      <div
-        ref={panelRef}
-        className={cn(
-          "relative flex h-[560px] w-[min(520px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_20px_60px_-20px_oklch(0_0_0/0.3)]",
-          "slide-up-in"
-        )}
-      >
+      <div className="slide-up-in relative flex h-[560px] w-[min(520px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-pop)]">
         <div className="flex items-center gap-3 border-b border-border px-5 py-3.5">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground">
             <Sparkles className="h-3.5 w-3.5" />
-            <span
-              aria-hidden
-              className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card"
-            />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-serif text-[15px] italic leading-tight text-foreground">
+            <div className="text-[14px] font-semibold leading-tight text-foreground">
               Ask Candor
             </div>
-            <div className="text-[11px] text-muted-foreground">
-              Your AI booking assistant &middot; reads your data, doesn&apos;t share it
+            <div className="text-[11.5px] text-muted-foreground">
+              Reads your bookings and payments — never shares them
             </div>
           </div>
           <button
@@ -122,29 +145,19 @@ export function TalentAiPopup() {
           </button>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="flex-1 space-y-3 overflow-y-auto px-5 py-4"
-        >
+        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {messages.map((m, i) => (
             <div
               key={i}
               className={cn(
-                "flex gap-2",
+                "flex",
                 m.role === "talent" ? "justify-end" : "justify-start"
               )}
             >
-              {m.role === "ai" && (
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
-                  <Sparkles className="h-3 w-3" />
-                </div>
-              )}
               <div
                 className={cn(
-                  "max-w-[78%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed slide-up-in",
-                  m.role === "talent"
-                    ? "rounded-br-md bg-foreground text-background"
-                    : "rounded-bl-md bg-surface-muted text-foreground"
+                  "bubble bubble-enter",
+                  m.role === "talent" ? "bubble-out" : "bubble-in"
                 )}
               >
                 {m.text}
@@ -152,35 +165,25 @@ export function TalentAiPopup() {
             </div>
           ))}
           {thinking && (
-            <div className="flex gap-2">
-              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
-                <Sparkles className="h-3 w-3" />
-              </div>
-              <div className="rounded-2xl rounded-bl-md bg-surface-muted px-3.5 py-2.5 text-[13px] text-muted-foreground">
-                <span className="inline-flex gap-1">
-                  <span className="dot-pulse inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
-                  Thinking…
-                </span>
+            <div className="flex justify-start">
+              <div className="bubble bubble-in bubble-enter text-muted-foreground">
+                <TypingDots />
               </div>
             </div>
           )}
         </div>
 
         {messages.length <= 1 && (
-          <div className="border-t border-border px-5 pt-3 pb-1">
-            <div className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/60">
-              Try asking
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="px-5 pb-2">
+            <div className="flex flex-wrap gap-1.5">
               {SUGGESTED.map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => send(s)}
-                  className="group inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11.5px] text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface-muted hover:text-foreground"
+                  className="pressable inline-flex items-center rounded-full border border-border bg-surface px-3 py-1.5 text-[12px] text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
                 >
                   {s}
-                  <ArrowUpRight className="h-3 w-3 translate-x-0 opacity-0 transition-[transform,opacity] duration-200 ease-out group-hover:translate-x-0.5 group-hover:opacity-100" />
                 </button>
               ))}
             </div>
@@ -192,22 +195,25 @@ export function TalentAiPopup() {
             e.preventDefault();
             send(draft);
           }}
-          className="flex items-center gap-2 border-t border-border px-4 py-3"
+          className="border-t border-border p-3"
         >
-          <input
-            autoFocus
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Ask about bookings, payments, schedule…"
-            className="h-9 flex-1 bg-transparent px-2 text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={!draft.trim()}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background transition-opacity duration-200 disabled:opacity-30"
-          >
-            <Send className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-2 rounded-xl border border-input bg-surface px-2 py-1.5 transition-[border-color,box-shadow] duration-140 ease-[var(--ease-out)] focus-within:border-brand/60 focus-within:ring-2 focus-within:ring-ring">
+            <input
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Ask about bookings, payments, schedule…"
+              className="h-8 flex-1 bg-transparent px-1.5 text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!draft.trim() || thinking}
+              aria-label="Send"
+              className="pressable flex h-7 w-7 items-center justify-center rounded-full bg-brand text-brand-foreground transition-opacity duration-150 hover:bg-brand-hover disabled:opacity-30"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </form>
       </div>
     </div>

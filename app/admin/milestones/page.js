@@ -19,7 +19,7 @@ export default async function MilestonesAdminPage() {
         meta={`${pending.length + published.length} on record`}
         title={
           <>
-            Milestones <span className="editorial-italic">&amp; moments</span>
+            Milestones &amp; moments
           </>
         }
         lede="When a talent lands a job worth shouting about, a draft lands here. Approve it, tweak the copy, or keep it anonymous — then it goes live to the roster's feed."
@@ -40,7 +40,7 @@ export default async function MilestonesAdminPage() {
         <div className="mt-10 rounded-sm border border-warning/30 bg-warning/[0.04] p-5">
           <div className="flex items-baseline justify-between pb-3">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-warning">
+              <div className="text-[11.5px] font-medium text-warning">
                 Drafts to review
               </div>
               <p className="mt-1 max-w-[58ch] text-[11.5px] leading-relaxed text-muted-foreground">
@@ -63,7 +63,7 @@ export default async function MilestonesAdminPage() {
 
       <div className="mt-12">
         <div className="flex items-baseline justify-between pb-3">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+          <div className="text-[11.5px] font-medium text-muted-foreground/70">
             Published
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -98,7 +98,7 @@ export default async function MilestonesAdminPage() {
                               className="h-8 w-8 rounded-full object-cover ring-1 ring-border/60"
                             />
                           ) : (
-                            <span className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 font-serif text-[12px] font-light italic text-foreground ring-1 ring-border/60">
+                            <span className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-[12.5px] text-foreground ring-1 ring-border/60">
                               {t.first_name?.[0]}
                               {t.last_name?.[0]}
                             </span>
@@ -107,24 +107,24 @@ export default async function MilestonesAdminPage() {
                             <div className="truncate text-[12.5px] text-foreground">
                               {t.first_name} {t.last_name}
                             </div>
-                            <div className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                            <div className="font-mono text-[10.5px] text-muted-foreground/70">
                               Named
                             </div>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2.5">
-                          <span className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 font-serif text-[12px] font-light text-muted-foreground ring-1 ring-border/60">
+                          <span className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-[12px] font-medium text-muted-foreground ring-1 ring-border/60">
                             —
                           </span>
-                          <div className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                          <div className="font-mono text-[10.5px] text-muted-foreground/70">
                             Anonymous
                           </div>
                         </div>
                       )}
                     </div>
                     <div className="col-span-7 min-w-0">
-                      <blockquote className="border-l border-border/60 pl-4 font-serif text-[15px] font-light italic leading-relaxed text-foreground">
+                      <blockquote className="border-l border-border/60 pl-4 text-[13.5px] font-medium leading-relaxed text-foreground">
                         &ldquo;{m.display_text}&rdquo;
                       </blockquote>
                       {m.booking && (
@@ -137,13 +137,13 @@ export default async function MilestonesAdminPage() {
                       )}
                     </div>
                     <div className="col-span-2 text-right">
-                      <div className="text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                      <div className="text-[11.5px] font-medium text-muted-foreground/70">
                         Published
                       </div>
                       <div className="mt-0.5 font-mono text-[11px] text-foreground">
                         {dateShort(m.created_at)}
                       </div>
-                      <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-success">
+                      <div className="mt-1 inline-flex items-center gap-1.5 text-[11.5px] font-medium text-success">
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         Live
                       </div>
