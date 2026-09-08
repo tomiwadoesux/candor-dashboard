@@ -4,6 +4,38 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'Arno Pro';
+  src: url('/fonts/ArnoPro-BoldDisplay.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arno Pro';
+  src: url('/fonts/ArnoPro-Display.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arno Pro';
+  src: url('/fonts/ArnoPro-Display.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arno Pro';
+  src: url('/fonts/ArnoPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
   CANDOR — "Porcelain"
   Quiet, editorial, professional. Near-white porcelain surfaces, cool ink
@@ -374,6 +406,120 @@
     }
   }
 
+  @keyframes bell-ring {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    5%, 15% {
+      transform: rotate(-16deg);
+    }
+    10%, 20% {
+      transform: rotate(16deg);
+    }
+    25% {
+      transform: rotate(-10deg);
+    }
+    30% {
+      transform: rotate(10deg);
+    }
+    35% {
+      transform: rotate(-4deg);
+    }
+    40% {
+      transform: rotate(4deg);
+    }
+    45% {
+      transform: rotate(0deg);
+    }
+  }
+
+  .animate-bell-ring {
+    transform-origin: 50% 0%;
+    animation: bell-ring 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+
+  /*
+    Nav rail tooltip. Deliberately NOT Tailwind's group-hover: in v4 that
+    variant compiles to `@media (hover: hover)`, so on any device the browser
+    reports as touch-primary — a Windows 2-in-1 in tablet mode, an emulated
+    viewport — the label silently never appears. This is the one label telling
+    you what an unlabelled icon does, so it should not be conditional on that.
+    Focus-visible is included because the tooltip never showed for keyboard
+    users at all.
+  */
+  .rail-tip {
+    position: absolute;
+    left: calc(100% + 10px);
+    z-index: 50;
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    background: var(--foreground);
+    color: var(--background);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms var(--ease-out);
+  }
+  .rail-btn:hover .rail-tip,
+  .rail-btn:focus-visible .rail-tip {
+    opacity: 1;
+  }
+
+  /* Community masthead — a studio light crossing the band. Not a metaphor to
+     decode: it is just light moving over a surface, the way it does in a
+     studio. 19s, so it reads as atmosphere rather than animation. */
+  @keyframes light-sweep {
+    from { transform: translateX(-30%); }
+    to { transform: translateX(30%); }
+  }
+  .light-sweep {
+    animation: light-sweep 19s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  @keyframes shaft-drift {
+    from { opacity: 0.10; transform: translateX(-14px); }
+    to { opacity: 0.22; transform: translateX(14px); }
+  }
+  .shaft-drift {
+    animation: shaft-drift var(--shaft-dur, 13s) ease-in-out infinite alternate;
+    animation-delay: var(--shaft-delay, 0s);
+  }
+
+  /* Feedback motion — things move because you did something. Each plays
+     once, on mount, and is over before you could describe it. */
+  @keyframes draw {
+    to { stroke-dashoffset: 0; }
+  }
+  .draw-in {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: draw 320ms var(--ease-out) 80ms forwards;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.18); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop-once {
+    display: inline-flex;
+    animation: pop 360ms var(--ease-out) both;
+  }
+
+  @keyframes tick {
+    from { transform: translateY(5px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .tick-in {
+    display: inline-block;
+    animation: tick 180ms var(--ease-out) both;
+  }
+
   /* Print: statements & invoices */
   .print-only {
     display: none;
@@ -409,6 +555,16 @@
   .card-hover,
   .polaroid {
     transition-duration: 1ms;
+  }
+  .draw-in,
+  .pop-once,
+  .tick-in {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+  .light-sweep,
+  .shaft-drift {
+    animation: none;
   }
   .shimmer {
     animation: none;

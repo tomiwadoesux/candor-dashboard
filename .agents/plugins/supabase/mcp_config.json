@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres.[YOUR_PROJECT_REF]:[YOUR_DB_PASSWORD]@aws-0-[YOUR_REGION].pooler.supabase.com:6543/postgres"
+      ]
+    }
+  }
+}
